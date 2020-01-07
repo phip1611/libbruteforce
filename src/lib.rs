@@ -1,88 +1,102 @@
-/// Calculates the amount of possible permutations if
-/// n symbols are given and m slots are available.
-/// Be aware that this solutions counts in that a
-/// password can be zero-length, one-length and so on.
-fn get_possible_combinations_count(symbol_count: usize, length: u32) -> usize {
-  let mut sum = 0;
-  for i in 0..(length + 1) {
-    sum += symbol_count.pow(i);
-  }
-  sum
-}
+use std::sync::Arc;
+use std::thread;
+use std::time::Instant;
+use crate::util::seconds_as_fraction;
+use crate::symbols::{combinations_count};
+use crate::indices::{indices_create, indices_to_string, indices_increment_by};
 
-/// Initializes the array with -1 in each field and returns it.
-/// Array is created on the heap.
-///
-/// The array represents the indices of the symbols in the current
-/// iteration trying to crack the password.
-///
-/// Example: If our alphabet is Σ={a,b,c}, our maximum password
-/// length is 5 and our current attempt is '[,,a,c,b]' then the
-/// indices will be '[-1,-1,0,2,1]'. Values will never ever
-/// go back to "-1" once been at 0 because we can't have empty
-/// slots inside a word (they shall be marked with a space in
-/// the alphabet).
-pub fn create_indices_arr(length: usize) -> Box<[isize]> {
-  vec![-1; length].into_boxed_slice()
-}
+mod indices;
+pub mod symbols;
+mod util;
 
-/// Transforms the indices array into a string using the alphabet.
-/// Empty slots will be skipped.
-pub fn indices_to_string(alphabet: &Box<[char]>, indices: &Box<[isize]>) -> String {
-  let mut word = String::new();
-  for i in 0..indices.len() {
-    let index = indices[i];
-    if index != -1 {
-      // otherwise our string isn't so far that long
-      let symbol = alphabet[index as usize];
-      if symbol != '\0' {
-        word.push(symbol)
-      }
+/// This function takes a target string( e.g. a MD5-Hash), the alphabet, the max length and tries
+/// to find the combination resulting in the target (the password).
+///
+/// You can specify the alphabet that should be used.
+///
+/// You can supply a transform function that transforms every possible value before it
+/// is matched with the target. This transform function can be the identity, a
+/// hashing algorithm, a hashing algorithm with appended salt to the value or something else.
+///
+/// This function is multi threaded. Therefore it wants to take ownership of all variables to
+/// prevent memory lifetimes issues.
+pub fn crack(target: String,
+             alphabet: Box<[char]>,
+             max_length: usize,
+             transform_fn: fn(&String) -> String) -> Option<String> {
+    if max_length == 0 {
+        panic!("Max length must be >= 1!");
     }
-  }
-  word
+
+    // only do multiple threads for big workloads
+    let thread_count = if combinations_count(&alphabet, max_length as u32) >= 10000 {
+        num_cpus::get() as isize
+    } else { 1 };
+
+    // TODO add something to stop threads if one found a solution
+
+    // make function parameters ready for sharing between threads
+    let alphabet = Arc::from(alphabet);
+    let target: Arc<String> = Arc::from(target);
+
+    let mut handles = vec![];
+
+    // for each thread (preparation + creation + start)
+    for tid in 0..thread_count {
+        // spawn thread for each cpu
+        let mut indices = indices_create(max_length);
+
+        // variables needed in thread
+        let target = Arc::clone(&target);
+        let alphabet = Arc::clone(&alphabet);
+
+        // prepare array for thread with right starting index
+        indices_increment_by(&alphabet, &mut indices, tid as isize).expect("Increment failed");
+
+        // spawn all threads
+        let h = thread::spawn(move || {
+            let start_time = Instant::now();
+            // infinite incrementing; break inside loop if its the right time for
+            loop {
+                let res = indices_increment_by(&alphabet, &mut indices, thread_count);
+                match res {
+                    Err(_) => {
+                        println!("Thread {} is done after {}s and didn't found a solution",
+                                 tid,
+                                 seconds_as_fraction(&start_time)
+                        );
+                        break;
+                    }
+                    _ => {
+                        // everything fine
+                        let string = indices_to_string(&alphabet, &indices);
+                        // transform; e.g. hashing
+                        let transformed_string = transform_fn(&string);
+                        if transformed_string == *target {
+                            println!("Thread {} is done after {}s and found a solution: {}",
+                                     tid,
+                                     seconds_as_fraction(&start_time),
+                                     string
+                            );
+                            break;
+                        }
+                    }
+                }
+            }
+        });
+        handles.push(h);
+    }
+
+    // auf alle Threads warten
+    handles.into_iter().for_each(|h| h.join().unwrap());
+
+    None
 }
 
 #[cfg(test)]
 mod tests {
-  use super::*;
+    use super::*;
 
-  #[test]
-  fn test_get_permutation_count() {
-    assert_eq!(get_possible_combinations_count(1, 3), 4, "1 symbol and a maximum length of 3");
-    assert_eq!(get_possible_combinations_count(3, 1), 4, "3 symbols and a maximum length of 1");
-    assert_eq!(get_possible_combinations_count(2, 3), 15, "3 symbols and a maximum length of 3");
-  }
 
-  #[test]
-  fn test_create_indices_arr() {
-    let arr = create_indices_arr(3);
-    assert_eq!(arr[0], -1);
-    assert_eq!(arr[1], -1);
-    assert_eq!(arr[2], -1);
-  }
 
-  #[test]
-  fn test_get_word_as_string_1() {
-    let alphabet: Box<[char]> = Box::from(['a', 'b', 'c']);
-    let mut arr = create_indices_arr(5);
-    arr[2] = 1;
-    arr[3] = 2;
-    arr[4] = 0;
-    let str = indices_to_string(&alphabet, &arr);
-    assert_eq!(str, "bca", "Strings should equal")
-  }
-
-  #[test]
-  fn test_get_word_as_string_2() {
-    let alphabet: Box<[char]> = Box::from(['a', 'b', 'c']);
-    let mut arr = create_indices_arr(5);
-    arr[0] = 1;
-    arr[1] = 1;
-    arr[2] = 1;
-    arr[3] = 2;
-    arr[4] = 0;
-    let str = indices_to_string(&alphabet, &arr);
-    assert_eq!(str, "bbbca", "Strings should equal")
-  }
 }

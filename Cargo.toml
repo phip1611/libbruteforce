@@ -1,5 +1,5 @@
 [package]
-name = "bruteforcer"
+name = "libbruteforce"
 version = "1.0.0"
 authors = ["Philipp Schuster <phip1611@gmail.com>"]
 edition = "2018"
@@ -7,3 +7,4 @@ edition = "2018"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+num_cpus = "1.11.1"
