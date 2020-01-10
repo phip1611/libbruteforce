@@ -9,7 +9,6 @@ pub type TransformationFn = fn(&String) -> String;
 
 #[cfg(test)]
 mod tests {
-    use super::*;
     use crate::transformation_fns::identity::NO_HASHING;
     use crate::transformation_fns::md5::MD5_HASHING;
     use crate::transformation_fns::sha1::SHA1_HASHING;
