@@ -67,7 +67,7 @@ pub fn crack(target: String,
                                  tid,
                                  seconds_as_fraction(&start_time)
                         );
-                        break;
+                        return None;
                     }
                     _ => {
                         // everything fine
@@ -80,25 +80,53 @@ pub fn crack(target: String,
                                      seconds_as_fraction(&start_time),
                                      string
                             );
-                            break;
+                            return Some(string);
                         }
                     }
                 }
             }
+            panic!("Here be dragons!");
         });
         handles.push(h);
     }
 
-    // auf alle Threads warten
-    handles.into_iter().for_each(|h| h.join().unwrap());
+    let mut result = None;
 
-    None
+    // auf alle Threads warten
+    handles.into_iter().for_each(|h| {
+        if let Some(x) = h.join().unwrap() {
+            result = Some(x);
+        }
+    });
+
+    result
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::symbols::full_alphabet;
+    use crate::transformation_fns::identity::NO_HASHING;
+    use crate::transformation_fns::sha256::SHA256_HASHING;
 
+    #[test]
+    fn test_crack_identity() {
+        let alphabet = full_alphabet();
+        let input = String::from("a+c");
+        let target = input.clone();
+        let result = crack(target.clone(), alphabet, input.len(), NO_HASHING);
+        assert!(target.eq(&result.unwrap()), "target and cracked result must equal!");
+    }
 
+    #[test]
+    fn test_crack_sha256() {
+        let alphabet = full_alphabet();
+        let input = String::from("a+c");
+        let target = SHA256_HASHING(&input);
+        let result = crack(target.clone(), alphabet, input.len(), SHA256_HASHING);
+        assert!(result.is_some(), "a solution MUST be found");
+        let result = result.unwrap();
+        assert!(input.eq(&result), "target and cracked result must equal!");
+    }
 
 }
