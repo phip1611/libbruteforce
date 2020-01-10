@@ -4,10 +4,12 @@ use std::time::Instant;
 use crate::util::seconds_as_fraction;
 use crate::symbols::{combinations_count};
 use crate::indices::{indices_create, indices_to_string, indices_increment_by};
+use crate::transformation_fns::TransformationFn;
 
 mod indices;
 pub mod symbols;
 mod util;
+pub mod transformation_fns;
 
 /// This function takes a target string( e.g. a MD5-Hash), the alphabet, the max length and tries
 /// to find the combination resulting in the target (the password).
@@ -23,7 +25,7 @@ mod util;
 pub fn crack(target: String,
              alphabet: Box<[char]>,
              max_length: usize,
-             transform_fn: fn(&String) -> String) -> Option<String> {
+             transform_fn: TransformationFn) -> Option<String> {
     if max_length == 0 {
         panic!("Max length must be >= 1!");
     }

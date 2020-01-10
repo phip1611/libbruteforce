@@ -8,3 +8,6 @@ edition = "2018"
 
 [dependencies]
 num_cpus = "1.11.1"
+md5 = "0.7.0"
+sha1 = "0.6.0"
+sha2 = "0.8.1"
