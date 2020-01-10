@@ -31,7 +31,7 @@ pub static COMMON_SPECIAL_CHARS: [char; 16] = [
 ];
 
 /// all special chars on a common qwertz keyboard
-pub static ALL_SPECIAL_CHARS: [char; 26] = [
+pub static ALL_OTHER_SPECIAL_CHARS: [char; 26] = [
     '_', ':', ';', '<', '>', '|', '\'', '*', '~', '`', '´',
     '\\', '^', '°', '(', ')', '{', '}', '[', ']', '€', '@', '"', '§',
     '/', 'µ'
@@ -77,7 +77,7 @@ pub fn build_alphabet(lc_letters: bool,
         symbols.extend_from_slice(&COMMON_SPECIAL_CHARS);
     }
     if all_special_chars {
-        symbols.extend_from_slice(&ALL_SPECIAL_CHARS);
+        symbols.extend_from_slice(&ALL_OTHER_SPECIAL_CHARS);
     }
     symbols.into_boxed_slice()
 }

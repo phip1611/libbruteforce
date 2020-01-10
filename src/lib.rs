@@ -85,7 +85,6 @@ pub fn crack(target: String,
                     }
                 }
             }
-            panic!("Here be dragons!");
         });
         handles.push(h);
     }
