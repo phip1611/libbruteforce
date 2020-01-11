@@ -58,33 +58,23 @@ pub fn crack(target: String,
         // spawn all threads
         let h = thread::spawn(move || {
             let start_time = Instant::now();
+            let mut result = None;
             // infinite incrementing; break inside loop if its the right time for
             loop {
                 let res = indices_increment_by(&alphabet, &mut indices, thread_count);
-                match res {
-                    Err(_) => {
-                        println!("Thread {} is done after {}s and didn't found a solution",
-                                 tid,
-                                 seconds_as_fraction(&start_time)
-                        );
-                        return None;
-                    }
-                    _ => {
-                        // everything fine
-                        let string = indices_to_string(&alphabet, &indices);
-                        // transform; e.g. hashing
-                        let transformed_string = transform_fn(&string);
-                        if transformed_string == *target {
-                            println!("Thread {} is done after {}s and found a solution: {}",
-                                     tid,
-                                     seconds_as_fraction(&start_time),
-                                     string
-                            );
-                            return Some(string);
-                        }
-                    }
+                if let Err(_) = res {
+                    // reached incrementing limit; thread is done
+                    break;
+                }
+
+                let string = indices_to_string(&alphabet, &indices);
+                // transform; e.g. hashing
+                let transformed_string = transform_fn(&string);
+                if transformed_string == *target {
+                    result = Some(string);
                 }
             }
+            result
         });
         handles.push(h);
     }
