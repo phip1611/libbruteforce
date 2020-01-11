@@ -1,7 +1,13 @@
-pub mod identity;
-pub mod md5;
-pub mod sha1;
-pub mod sha256;
+mod identity;
+mod md5;
+mod sha1;
+mod sha256;
+
+// reexport
+pub use crate::transformation_fns::identity::NO_HASHING;
+pub use crate::transformation_fns::sha1::SHA1_HASHING;
+pub use crate::transformation_fns::sha256::SHA256_HASHING;
+pub use crate::transformation_fns::md5::MD5_HASHING;
 
 /// This type describes functions used to transform the current guess during the bruteforce run
 /// before it is compared to the target value. This can be a hashing algorithm for example.

@@ -3,6 +3,19 @@ name = "libbruteforce"
 version = "1.0.0"
 authors = ["Philipp Schuster <phip1611@gmail.com>"]
 edition = "2018"
+license = "MIT"
+description = '''
+This library helps you to brute force hashes (e.g. passwords). It includes a set of pre-configured
+hashing functions, like md5 or sha256. You can also provide your own hashing function. PLEASE DO NOT
+use this software to harm someones privacy in any kind! This project was made for fun and for teaching myself
+new things about Rust.
+'''
+homepage = "https://github.com/phip1611/libbruteforce"
+repository = "https://github.com/phip1611/libbruteforce"
+documentation = "https://github.com/phip1611/libbruteforce"
+readme = "README.md"
+keywords = ["bruteforce", "hashes", "passwords"]
+categories = ["algorithms"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 

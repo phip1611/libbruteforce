@@ -6,8 +6,8 @@
 /// iteration trying to crack the password.
 ///
 /// Example: If our alphabet is Σ={a,b,c}, our maximum password
-/// length is 5 and our current attempt is '[,,a,c,b]' then the
-/// indices will be '[-1,-1,0,2,1]'. Values will never ever
+/// length is 5 and our current attempt is [,,a,c,b] then the
+/// indices will be [-1,-1,0,2,1]. Values will never ever
 /// go back to "-1" once been at 0 because we can't have empty
 /// slots inside a word (they shall be marked with a space in
 /// the alphabet).
@@ -32,7 +32,7 @@ pub fn indices_to_string(alphabet: &Box<[char]>, indices: &Box<[isize]>) -> Stri
     word
 }
 
-/// Calculates how many fields are not "-1" aka how long the word that is represented is.
+/*/// Calculates how many fields are not "-1" aka how long the word that is represented is.
 pub fn indices_word_length(indices: &Box<[isize]>) -> usize {
     let mut n = 0;
     let mut i = (indices.len() - 1) as isize;
@@ -45,7 +45,7 @@ pub fn indices_word_length(indices: &Box<[isize]>) -> usize {
         }
     }
     n
-}
+}*/
 
 /// Increments the indices array by a given number.
 pub fn indices_increment_by(
@@ -91,7 +91,7 @@ pub fn indices_increment_by(
     } else {
         // at the end its not the original state or the maximum value but some
         // invalid value
-        Err("Overflow detected! Data/state is no invalid and no longer reliable!")
+        Err("Overflow detected! Data/state is now invalid and no longer reliable!")
     }
 }
 

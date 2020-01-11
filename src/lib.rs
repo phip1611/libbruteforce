@@ -1,3 +1,21 @@
+//! This library helps you to brute force hashes (e.g. passwords). It includes a set of pre-configured
+//! hashing functions, like md5 or sha256. You can also provide your own hashing function. PLEASE DO NOT
+//! use this software to harm someones privacy in any kind! This project was made for fun and for teaching myself
+//! new things about Rust.
+//! # Usage
+//!
+//! ```
+//! use libbruteforce::{symbols, crack};
+//! use libbruteforce::transformation_fns;
+//!
+//! let alphabet = symbols::full_alphabet();
+//! // or let alphabet = symbols::build_alphabet(true, true, false, false, false, false, false)
+//! let input = String::from("a+c");
+//! let target = String::from("3d7edde33628331676b39e19a3f2bdb3c583960ad8d865351a32e2ace7d8e02d");
+//!
+//! let result = crack(target.clone(), alphabet, input.len(), transformation_fns::SHA256_HASHING);
+//! ```
+
 use std::sync::Arc;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::thread;
@@ -11,17 +29,11 @@ mod indices;
 pub mod symbols;
 pub mod transformation_fns;
 
-/// This function takes a target string( e.g. a MD5-Hash), the alphabet, the max length and tries
-/// to find the combination resulting in the target (the password).
-///
-/// You can specify the alphabet that should be used.
-///
-/// You can supply a transform function that transforms every possible value before it
-/// is matched with the target. This transform function can be the identity, a
-/// hashing algorithm, a hashing algorithm with appended salt to the value or something else.
-///
-/// This function is multi threaded. Therefore it wants to take ownership of all variables to
-/// prevent memory lifetimes issues.
+/// This function starts a multithreaded brute force attack on a given target string. It supports
+/// any alphabet you want to use. You must provide a transformation function. There is a pre-build
+/// set of transformation functions available, such as `transformation_fns::NO_HASHING`, or
+/// `transformation_fns::SHA256`. You can also provide your own function if it is compatible
+/// with `transformation_fns::TransformationFn`.
 pub fn crack(target: String,
              alphabet: Box<[char]>,
              max_length: usize,
@@ -50,7 +62,7 @@ pub fn crack(target: String,
     );
     let mut result = None;
 
-    // auf alle Threads warten
+    // wait for all threads
     handles.into_iter().for_each(|h| {
         if let Some(x) = h.join().unwrap() {
             result = Some(x);
@@ -151,8 +163,8 @@ fn spawn_worker_thread(done: Arc<AtomicBool>,
 #[cfg(test)]
 mod tests {
     use crate::symbols::full_alphabet;
-    use crate::transformation_fns::identity::NO_HASHING;
-    use crate::transformation_fns::sha256::SHA256_HASHING;
+    use crate::transformation_fns::NO_HASHING;
+    use crate::transformation_fns::SHA256_HASHING;
 
     use super::*;
 
