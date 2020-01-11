@@ -13,7 +13,7 @@
 //! let input = String::from("a+c");
 //! let target = String::from("3d7edde33628331676b39e19a3f2bdb3c583960ad8d865351a32e2ace7d8e02d");
 //!
-//! let result = crack(target.clone(), alphabet, input.len(), transformation_fns::SHA256_HASHING);
+//! let result = crack(target, alphabet, input.len(), transformation_fns::SHA256_HASHING);
 //! ```
 
 use std::sync::Arc;
