@@ -5,6 +5,7 @@ use std::thread;
 use crate::indices::{indices_create, indices_increment_by, indices_to_string};
 use crate::symbols::combinations_count;
 use crate::transformation_fns::TransformationFn;
+use std::thread::JoinHandle;
 
 mod indices;
 pub mod symbols;
@@ -30,7 +31,7 @@ pub fn crack(target: String,
     }
 
     // only do multiple threads for big workloads
-    let thread_count = if combinations_count(&alphabet, max_length as u32) >= 10000 {
+    let thread_count = if combinations_count(&alphabet, max_length as u32) >= 10_000 {
         num_cpus::get() as isize
     } else { 1 };
 
@@ -39,9 +40,34 @@ pub fn crack(target: String,
     let target: Arc<String> = Arc::from(target);
     let done = Arc::from(AtomicBool::from(false));
 
-    let mut handles = vec![];
+    let handles = spawn_worker_threads(
+        done,
+        target,
+        transform_fn,
+        alphabet,
+        thread_count,
+        max_length
+    );
+    let mut result = None;
 
-    // for each thread (preparation + creation + start)
+    // auf alle Threads warten
+    handles.into_iter().for_each(|h| {
+        if let Some(x) = h.join().unwrap() {
+            result = Some(x);
+        }
+    });
+
+    result
+}
+
+/// Spawns all worker threads.
+fn spawn_worker_threads(done: Arc<AtomicBool>,
+                        target: Arc<String>,
+                        transform_fn: TransformationFn,
+                        alphabet: Arc<Box<[char]>>,
+                        thread_count: isize,
+                        max_length: usize) -> Vec<JoinHandle<Option<String>>> {
+    let mut handles = vec![];
     for tid in 0..thread_count {
         // spawn thread for each cpu
         let mut indices = indices_create(max_length);
@@ -55,62 +81,71 @@ pub fn crack(target: String,
         // prepare array for thread with right starting index
         indices_increment_by(&alphabet, &mut indices, tid as isize).expect("Increment failed");
 
-        // spawn all threads
-        let h = thread::spawn(move || {
-            // The result that the thread calculated/found
-            let mut result = None;
+        handles.push(
+            spawn_worker_thread(
+                done,
+                target,
+                transform_fn,
+                indices,
+                alphabet,
+                thread_count
+            )
+        );
+    }
+    handles
+}
 
-            /// The number after how many iterations the thread looks if another thread
-            /// is already done, so that we can stop further work. We do this only after
-            /// a few millions iterations to keep the overhead low. Tests on my machine
-            /// showed that 1 million iterations take about 1.6s - this should be okay
-            /// because the overhead is not that big
-            const INTERRUPT_COUNT_THRESHOLD: usize = 1_000_000;
-            let mut interrupt_count = INTERRUPT_COUNT_THRESHOLD;
+/// Spawns a worker thread with its work loop.
+fn spawn_worker_thread(done: Arc<AtomicBool>,
+                       target: Arc<String>,
+                       transform_fn: TransformationFn,
+                       indices: Box<[isize]>,
+                       alphabet: Arc<Box<[char]>>,
+                       thread_count: isize) -> JoinHandle<Option<String>> {
+    // mark var as mutable for compiler
+    let mut indices = indices;
+    thread::spawn(move || {
+        // The result that the thread calculated/found
+        let mut result = None;
 
-            // infinite incrementing; break inside loop if its the right time for
-            loop {
-                if interrupt_count > 0 {
-                    interrupt_count -= 1;
-                } else {
-                    interrupt_count = INTERRUPT_COUNT_THRESHOLD;
-                    let done = done.load(Ordering::SeqCst);
-                    if done {
-                        // another thread already found a solution
-                        break;
-                    }
-                }
+        /// The number after how many iterations the thread looks if another thread
+        /// is already done, so that we can stop further work. We do this only after
+        /// a few millions iterations to keep the overhead low. Tests on my machine
+        /// showed that 1 million iterations take about 1.6s - this should be okay
+        /// because the overhead is not that big
+        const INTERRUPT_COUNT_THRESHOLD: usize = 1_000_000;
+        let mut interrupt_count = INTERRUPT_COUNT_THRESHOLD;
 
-                let res = indices_increment_by(&alphabet, &mut indices, thread_count);
-                if res.is_err() {
-                    // reached incrementing limit; thread is done
+        // infinite incrementing; break inside loop if its the right time for
+        loop {
+            if interrupt_count > 0 {
+                interrupt_count -= 1;
+            } else {
+                interrupt_count = INTERRUPT_COUNT_THRESHOLD;
+                let done = done.load(Ordering::SeqCst);
+                if done {
+                    // another thread already found a solution
                     break;
                 }
-
-                let string = indices_to_string(&alphabet, &indices);
-                // transform; e.g. hashing
-                let transformed_string = transform_fn(&string);
-                if transformed_string == *target {
-                    // let other threads now we are done
-                    done.store(true, Ordering::SeqCst);
-                    result = Some(string);
-                }
             }
-            result
-        });
-        handles.push(h);
-    }
 
-    let mut result = None;
+            let res = indices_increment_by(&alphabet, &mut indices, thread_count);
+            if res.is_err() {
+                // reached incrementing limit; thread is done
+                break;
+            }
 
-    // auf alle Threads warten
-    handles.into_iter().for_each(|h| {
-        if let Some(x) = h.join().unwrap() {
-            result = Some(x);
+            let string = indices_to_string(&alphabet, &indices);
+            // transform; e.g. hashing
+            let transformed_string = transform_fn(&string);
+            if transformed_string == *target {
+                // let other threads now we are done
+                done.store(true, Ordering::SeqCst);
+                result = Some(string);
+            }
         }
-    });
-
-    result
+        result
+    })
 }
 
 #[cfg(test)]
