@@ -25,6 +25,7 @@ use crate::symbols::combinations_count;
 use crate::transformation_fns::TransformationFn;
 use std::thread::JoinHandle;
 
+pub mod benchmark;
 mod indices;
 pub mod symbols;
 pub mod transformation_fns;
