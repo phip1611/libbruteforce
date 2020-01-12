@@ -107,7 +107,7 @@ fn spawn_worker_threads(done: Arc<AtomicBool>,
                 transform_fn,
                 indices,
                 alphabet,
-                thread_count
+                thread_count,
             )
         );
     }
@@ -137,28 +137,21 @@ fn spawn_worker_thread(done: Arc<AtomicBool>,
 
         // infinite incrementing; break inside loop if its the right time for
         loop {
-            if interrupt_count > 0 {
-                interrupt_count -= 1;
-            } else {
+            interrupt_count -= 1;
+            if interrupt_count == 0 {
                 interrupt_count = INTERRUPT_COUNT_THRESHOLD;
                 let done = done.load(Ordering::SeqCst);
-                if done {
-                    // another thread already found a solution
-                    break;
-                }
+                if done { break; }
             }
 
             let res = indices_increment_by(&alphabet, &mut indices, thread_count);
-            if res.is_err() {
-                // reached incrementing limit; thread is done
-                break;
-            }
+            if res.is_err() { break; }
 
             let string = indices_to_string(&alphabet, &indices);
             // transform; e.g. hashing
             let transformed_string = transform_fn(&string);
             if transformed_string == *target {
-                // let other threads now we are done
+                // let other threads know we are done
                 done.store(true, Ordering::SeqCst);
                 result = Some(string);
             }
@@ -185,7 +178,7 @@ mod tests {
             alphabet,
             input.len(),
             NO_HASHING,
-            false
+            false,
         );
         assert!(target.eq(&result.unwrap()), "target and cracked result must equal!");
     }
@@ -200,7 +193,7 @@ mod tests {
             alphabet,
             input.len(),
             SHA256_HASHING,
-            false
+            false,
         );
         assert!(result.is_some(), "a solution MUST be found");
         let result = result.unwrap();
