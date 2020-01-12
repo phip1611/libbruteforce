@@ -17,6 +17,7 @@ pub fn indices_create(length: usize) -> Box<[isize]> {
 
 /// Transforms the indices array into a string using the alphabet.
 /// Empty slots will be skipped.
+#[inline] // small but notable performance gain
 pub fn indices_to_string(alphabet: &Box<[char]>, indices: &Box<[isize]>) -> String {
     let mut word = String::new();
     for i in 0..indices.len() {
@@ -24,9 +25,7 @@ pub fn indices_to_string(alphabet: &Box<[char]>, indices: &Box<[isize]>) -> Stri
         if index != -1 {
             // otherwise our string isn't so far that long
             let symbol = alphabet[index as usize];
-            if symbol != '\0' {
-                word.push(symbol)
-            }
+            word.push(symbol);
         }
     }
     word
@@ -47,7 +46,9 @@ pub fn indices_word_length(indices: &Box<[isize]>) -> usize {
     n
 }
 
-/// Increments the indices array by a given number.
+/// Increments the indices array by a given number.v
+// small but notable performance gain
+#[inline]
 pub fn indices_increment_by(
     alphabet: &Box<[char]>,
     indices: &mut Box<[isize]>,
