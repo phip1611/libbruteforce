@@ -32,7 +32,7 @@ pub fn indices_to_string(alphabet: &Box<[char]>, indices: &Box<[isize]>) -> Stri
     word
 }
 
-/*/// Calculates how many fields are not "-1" aka how long the word that is represented is.
+/// Calculates how many fields are not "-1" aka how long the word that is represented is.
 pub fn indices_word_length(indices: &Box<[isize]>) -> usize {
     let mut n = 0;
     let mut i = (indices.len() - 1) as isize;
@@ -45,16 +45,14 @@ pub fn indices_word_length(indices: &Box<[isize]>) -> usize {
         }
     }
     n
-}*/
+}
 
 /// Increments the indices array by a given number.
 pub fn indices_increment_by(
     alphabet: &Box<[char]>,
     indices: &mut Box<[isize]>,
-    add_value: isize) -> Result<(), &'static str> {
-    if add_value < 0 {
-        return Err("add_value must be > 0");
-    } else if (add_value) == 0 {
+    add_value: usize) -> Result<(), &'static str> {
+    if add_value == 0 {
         // Nothing to do
         return Ok(());
     }
@@ -72,12 +70,12 @@ pub fn indices_increment_by(
 
         // the current index at this position in the indices array
         let current_value = indices[position];
-        let mut new_value = current_value + carry;
+        let mut new_value = current_value + carry as isize;
 
         // out of bounds? modulo!
         if new_value >= alphabet.len() as isize {
             // carry for next position/next iteration
-            carry = new_value / (alphabet.len()) as isize;
+            carry = new_value as usize / alphabet.len();
             new_value = new_value % (alphabet.len()) as isize;
         } else {
             carry = 0;
@@ -190,7 +188,7 @@ mod tests {
         let mut indices = indices_create(LEN);
         // should make -1 -1 -1 to 2 2 2
         // minus one because we are already at the first element (-1, -1, -1)
-        let steps = combinations_count(&alphabet, LEN as u32, ) as isize - 1;
+        let steps = combinations_count(&alphabet, LEN as u32, ) - 1;
         indices_increment_by(&alphabet, &mut indices, steps);
         for i in 0..LEN {
             assert_eq!(indices[i], (alphabet.len() - 1) as isize)

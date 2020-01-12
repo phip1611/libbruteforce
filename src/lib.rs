@@ -13,7 +13,7 @@
 //! let input = String::from("a+c");
 //! let target = String::from("3d7edde33628331676b39e19a3f2bdb3c583960ad8d865351a32e2ace7d8e02d");
 //!
-//! let result = crack(target, alphabet, input.len(), transformation_fns::SHA256_HASHING);
+//! let result = crack(target, alphabet, input.len(), transformation_fns::SHA256_HASHING, false);
 //! ```
 
 use std::sync::Arc;
@@ -34,17 +34,24 @@ pub mod transformation_fns;
 /// set of transformation functions available, such as `transformation_fns::NO_HASHING`, or
 /// `transformation_fns::SHA256`. You can also provide your own function if it is compatible
 /// with `transformation_fns::TransformationFn`.
+///
+/// * `fair_mode` - use n - 1 (instead of n) threads to keep your system useable (n: #cores)
 pub fn crack(target: String,
              alphabet: Box<[char]>,
              max_length: usize,
-             transform_fn: TransformationFn) -> Option<String> {
+             transform_fn: TransformationFn,
+             fair_mode: bool) -> Option<String> {
     if max_length == 0 {
         panic!("Max length must be >= 1!");
     }
 
     // only do multiple threads for big workloads
     let thread_count = if combinations_count(&alphabet, max_length as u32) >= 10_000 {
-        num_cpus::get() as isize
+        if fair_mode {
+            num_cpus::get()
+        } else {
+            (num_cpus::get() - 1)
+        }
     } else { 1 };
 
     // make function parameters ready for sharing between threads
@@ -58,7 +65,7 @@ pub fn crack(target: String,
         transform_fn,
         alphabet,
         thread_count,
-        max_length
+        max_length,
     );
     let mut result = None;
 
@@ -77,7 +84,7 @@ fn spawn_worker_threads(done: Arc<AtomicBool>,
                         target: Arc<String>,
                         transform_fn: TransformationFn,
                         alphabet: Arc<Box<[char]>>,
-                        thread_count: isize,
+                        thread_count: usize,
                         max_length: usize) -> Vec<JoinHandle<Option<String>>> {
     let mut handles = vec![];
     for tid in 0..thread_count {
@@ -91,7 +98,7 @@ fn spawn_worker_threads(done: Arc<AtomicBool>,
         let done = done.clone();
 
         // prepare array for thread with right starting index
-        indices_increment_by(&alphabet, &mut indices, tid as isize).expect("Increment failed");
+        indices_increment_by(&alphabet, &mut indices, tid).expect("Increment failed");
 
         handles.push(
             spawn_worker_thread(
@@ -113,7 +120,7 @@ fn spawn_worker_thread(done: Arc<AtomicBool>,
                        transform_fn: TransformationFn,
                        indices: Box<[isize]>,
                        alphabet: Arc<Box<[char]>>,
-                       thread_count: isize) -> JoinHandle<Option<String>> {
+                       thread_count: usize) -> JoinHandle<Option<String>> {
     // mark var as mutable for compiler
     let mut indices = indices;
     thread::spawn(move || {
@@ -173,7 +180,13 @@ mod tests {
         let alphabet = full_alphabet();
         let input = String::from("a+c");
         let target = input.clone();
-        let result = crack(target.clone(), alphabet, input.len(), NO_HASHING);
+        let result = crack(
+            target.clone(),
+            alphabet,
+            input.len(),
+            NO_HASHING,
+            false
+        );
         assert!(target.eq(&result.unwrap()), "target and cracked result must equal!");
     }
 
@@ -182,7 +195,13 @@ mod tests {
         let alphabet = full_alphabet();
         let input = String::from("a+c");
         let target = SHA256_HASHING(&input);
-        let result = crack(target.clone(), alphabet, input.len(), SHA256_HASHING);
+        let result = crack(
+            target.clone(),
+            alphabet,
+            input.len(),
+            SHA256_HASHING,
+            false
+        );
         assert!(result.is_some(), "a solution MUST be found");
         let result = result.unwrap();
         assert!(input.eq(&result), "target and cracked result must equal!");
