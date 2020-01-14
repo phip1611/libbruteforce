@@ -15,7 +15,7 @@ pub fn spawn_worker_threads(cp: Arc<InternalCrackParameter>,
     let mut handles = vec![];
     // spawn thread for each cpu
     for tid in 0..cp.thread_count {
-        let mut indices = indices_create(cp.max_length);
+        let mut indices = indices_create(cp.max_length, cp.min_length);
         // prepare array for thread with right starting index
         indices_increment_by(&cp.alphabet, &mut indices, tid).expect("Increment failed");
         handles.push(
