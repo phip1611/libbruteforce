@@ -22,5 +22,9 @@ fn main() {
     let result = libbruteforce::crack(cp);
     assert!(result.is_success(), format!("A solution MUST be found! Should be '{}'", target));
     assert!(target.eq(result.solution.as_ref().unwrap()), "The solution MUST be correct!");
-    println!("Did {} iterations in {} in threads in {}s", result.combinations_total, result.thread_count, result.seconds_as_fraction);
+    println!("Did {} iterations in {} threads in {}s", result.combinations_total, result.thread_count, result.seconds_as_fraction);
+    let iterations_p_s = result.combinations_total as f64 / result.seconds_as_fraction;
+    let iterations_ps_pt = iterations_p_s / result.thread_count as f64;
+    println!("{} iterations / s ", iterations_p_s as usize);
+    println!("{} iterations / s (per thread)", iterations_ps_pt as usize);
 }
