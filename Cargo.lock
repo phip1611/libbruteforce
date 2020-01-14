@@ -60,7 +60,7 @@ dependencies = [
 
 [[package]]
 name = "libbruteforce"
-version = "1.0.1"
+version = "2.0.0"
 dependencies = [
  "md5 0.7.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "num_cpus 1.11.1 (registry+https://github.com/rust-lang/crates.io-index)",
