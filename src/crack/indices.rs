@@ -11,8 +11,8 @@
 /// go back to "-1" once been at 0 because we can't have empty
 /// slots inside a word (they shall be marked with a space in
 /// the alphabet).
-pub fn indices_create(length: usize) -> Box<[isize]> {
-    vec![-1; length].into_boxed_slice()
+pub fn indices_create(length: u32) -> Box<[isize]> {
+    vec![-1; length as usize].into_boxed_slice()
 }
 
 /// Transforms the indices array into a string using the alphabet.
@@ -97,8 +97,9 @@ pub fn indices_increment_by(
 
 #[cfg(test)]
 mod tests {
-    use super::*;
     use crate::symbols::combinations_count;
+
+    use super::*;
 
     #[test]
     fn test_create_indices_arr() {
@@ -184,27 +185,27 @@ mod tests {
 
     #[test]
     fn test_increment_indices_to_upper_bound() {
-        const LEN: usize = 3;
+        let len = 3;
         let alphabet: Box<[char]> = Box::from(['a', 'b', 'c']);
-        let mut indices = indices_create(LEN);
+        let mut indices = indices_create(len);
         // should make -1 -1 -1 to 2 2 2
         // minus one because we are already at the first element (-1, -1, -1)
-        let steps = combinations_count(&alphabet, LEN as u32, ) - 1;
+        let steps = combinations_count(&alphabet, len, 0) - 1;
         indices_increment_by(&alphabet, &mut indices, steps);
-        for i in 0..LEN {
-            assert_eq!(indices[i], (alphabet.len() - 1) as isize)
+        for i in 0..len {
+            assert_eq!(indices[i as usize], (alphabet.len() - 1) as isize)
         }
     }
 
     #[test]
     fn test_length_of_indices_array() {
         let alphabet: Box<[char]> = Box::from(['a']);
-        const LENGTH: usize = 5;
-        let mut indices = indices_create(LENGTH);
+        let length = 5;
+        let mut indices = indices_create(length);
         assert_eq!(0, indices_word_length(&indices));
         indices_increment_by(&alphabet, &mut indices, 1);
         assert_eq!(1, indices_word_length(&indices));
         indices_increment_by(&alphabet, &mut indices, 4);
-        assert_eq!(LENGTH, indices_word_length(&indices));
+        assert_eq!(length as usize, indices_word_length(&indices));
     }
 }

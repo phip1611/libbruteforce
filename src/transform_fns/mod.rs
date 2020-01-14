@@ -1,24 +1,24 @@
+// reexport
+pub use crate::transform_fns::identity::NO_HASHING;
+pub use crate::transform_fns::md5::MD5_HASHING;
+pub use crate::transform_fns::sha1::SHA1_HASHING;
+pub use crate::transform_fns::sha256::SHA256_HASHING;
+
 mod identity;
 mod md5;
 mod sha1;
 mod sha256;
 
-// reexport
-pub use crate::transformation_fns::identity::NO_HASHING;
-pub use crate::transformation_fns::sha1::SHA1_HASHING;
-pub use crate::transformation_fns::sha256::SHA256_HASHING;
-pub use crate::transformation_fns::md5::MD5_HASHING;
-
 /// This type describes functions used to transform the current guess during the bruteforce run
 /// before it is compared to the target value. This can be a hashing algorithm for example.
-pub type TransformationFn = fn(&String) -> String;
+pub type TransformFn = fn(&String) -> String;
 
 #[cfg(test)]
 mod tests {
-    use crate::transformation_fns::identity::NO_HASHING;
-    use crate::transformation_fns::md5::MD5_HASHING;
-    use crate::transformation_fns::sha1::SHA1_HASHING;
-    use crate::transformation_fns::sha256::SHA256_HASHING;
+    use crate::transform_fns::identity::NO_HASHING;
+    use crate::transform_fns::md5::MD5_HASHING;
+    use crate::transform_fns::sha1::SHA1_HASHING;
+    use crate::transform_fns::sha256::SHA256_HASHING;
 
     #[test]
     fn test_identity() {

@@ -1,3 +1,5 @@
+//! This module contains prebuilt alphabets/symbols that you can use.
+
 /// Latin Digits
 pub static DIGITS: [char; 10] = [
     '0', '1', '2', '3', '4', '5', '6', '7', '8', '9'
@@ -45,7 +47,7 @@ pub fn full_alphabet() -> Box<[char]> {
                    true,
                    true,
                    true,
-                   true
+                   true,
     )
 }
 
@@ -82,13 +84,12 @@ pub fn build_alphabet(lc_letters: bool,
     symbols.into_boxed_slice()
 }
 
-/// Calculates the amount of possible permutations if
-/// n symbols are given and m slots are available.
-/// Be aware that this solutions counts in that a
-/// password can be zero-length, one-length and so on.
-pub fn combinations_count(alphabet: &Box<[char]>, length: u32) -> usize {
+/// Calculates the amount of possible permutations if n symbols are given and m slots are available.
+/// This solutions counts in that the value can be zero-length, one-length and so on.
+pub fn combinations_count(alphabet: &Box<[char]>, max_length: u32, min_length: u32) -> usize {
+    if min_length > max_length { panic!("max_length must be >= min_length") }
     let mut sum = 0;
-    for i in 0..(length + 1) {
+    for i in min_length..(max_length + 1) {
         sum += alphabet.len().pow(i);
     }
     sum
@@ -103,25 +104,37 @@ mod tests {
     fn test_build_alphabet() {
         let alphabet = build_alphabet(
             false, true, true, false,
-            false, false, false
+            false, false, false,
         );
         assert_eq!(alphabet.len(), 36);
 
         let alphabet = build_alphabet(
             true, true, true, true,
-            true, true, true
+            true, true, true,
         );
         assert_eq!(alphabet.len(), 10 + 26 + 26 + 3 + 3 + 16 + 26);
         assert_eq!(alphabet.len(), full_alphabet().len());
     }
 
     #[test]
-    fn test_get_permutation_count() {
+    fn test_combinations_count() {
         let alphabet1: Box<[char]> = Box::from(['a']);
         let alphabet2: Box<[char]> = Box::from(['a', 'b', 'c']);
         let alphabet3: Box<[char]> = Box::from(['a', 'b']);
-        assert_eq!(combinations_count(&alphabet1, 3), 4, "1 symbol and a maximum length of 3");
-        assert_eq!(combinations_count(&alphabet2, 1), 4, "3 symbols and a maximum length of 1");
-        assert_eq!(combinations_count(&alphabet3, 3), 15, "3 symbols and a maximum length of 3");
+        let alphabet4: Box<[char]> = Box::from([]);
+        let alphabet5: Box<[char]> = Box::from(DIGITS);
+        assert_eq!(combinations_count(&alphabet1, 3, 0), 4, "1 symbol and a maximum length of 3");
+        assert_eq!(combinations_count(&alphabet2, 1, 0), 4, "3 symbols and a maximum length of 1");
+        assert_eq!(combinations_count(&alphabet3, 3, 0), 15, "3 symbols and a maximum length of 3");
+        assert_eq!(combinations_count(&alphabet4, 0, 0), 1, "0 symbols");
+        assert_eq!(combinations_count(&alphabet4, 0, 0), 1, "0 symbols");
+        assert_eq!(combinations_count(&alphabet5, 4, 4), 10_000);
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_combinations_count_panic() {
+        let alphabet: Box<[char]> = Box::from(['a']);
+        assert_eq!(combinations_count(&alphabet, 0, 1), 0, "min length must be <= max length");
     }
 }

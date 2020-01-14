@@ -1,52 +1,39 @@
-use std::sync::atomic::{AtomicBool, Ordering};
+//! All functions related for the multithreaded cracking process.
+//! The actual cracking happens here.
+
 use std::sync::Arc;
-use std::thread::JoinHandle;
-use crate::transformation_fns::TransformationFn;
-use crate::indices::{indices_create, indices_increment_by, indices_to_string};
+use std::sync::atomic::{AtomicBool, Ordering};
 use std::thread;
+use std::thread::JoinHandle;
+
+use crate::crack::indices::{indices_create, indices_increment_by, indices_to_string};
+use crate::crack::parameter::InternalCrackParameter;
 
 /// Spawns all worker threads.
-pub fn spawn_worker_threads(done: Arc<AtomicBool>,
-                        target: Arc<String>,
-                        transform_fn: TransformationFn,
-                        alphabet: Arc<Box<[char]>>,
-                        thread_count: usize,
-                        max_length: usize) -> Vec<JoinHandle<Option<String>>> {
+pub fn spawn_worker_threads(cp: Arc<InternalCrackParameter>,
+                            done: Arc<AtomicBool>) -> Vec<JoinHandle<Option<String>>> {
     let mut handles = vec![];
-    for tid in 0..thread_count {
-        // spawn thread for each cpu
-        let mut indices = indices_create(max_length);
-
-        // variables needed in thread
-        let target = Arc::clone(&target);
-        let alphabet = Arc::clone(&alphabet);
-
-        let done = done.clone();
-
+    // spawn thread for each cpu
+    for tid in 0..cp.thread_count {
+        let mut indices = indices_create(cp.max_length);
         // prepare array for thread with right starting index
-        indices_increment_by(&alphabet, &mut indices, tid).expect("Increment failed");
-
+        indices_increment_by(&cp.alphabet, &mut indices, tid).expect("Increment failed");
         handles.push(
             spawn_worker_thread(
-                done,
-                target,
-                transform_fn,
+                cp.clone(),
+                done.clone(),
                 indices,
-                alphabet,
-                thread_count,
-            )
+                tid)
         );
     }
     handles
 }
 
 /// Spawns a worker thread with its work loop.
-fn spawn_worker_thread(done: Arc<AtomicBool>,
-                       target: Arc<String>,
-                       transform_fn: TransformationFn,
+fn spawn_worker_thread(cp: Arc<InternalCrackParameter>,
+                       done: Arc<AtomicBool>,
                        indices: Box<[isize]>,
-                       alphabet: Arc<Box<[char]>>,
-                       thread_count: usize) -> JoinHandle<Option<String>> {
+                       _tid: usize) -> JoinHandle<Option<String>> {
     // mark var as mutable for compiler
     let mut indices = indices;
     thread::spawn(move || {
@@ -69,13 +56,14 @@ fn spawn_worker_thread(done: Arc<AtomicBool>,
                 if done.load(Ordering::SeqCst) { break; }
             }
 
-            let res = indices_increment_by(&alphabet, &mut indices, thread_count);
+            let res = indices_increment_by(&cp.alphabet, &mut indices, cp.thread_count);
             if res.is_err() { break; }
 
-            let string = indices_to_string(&alphabet, &indices);
+            let string = indices_to_string(&cp.alphabet, &indices);
             // transform; e.g. hashing
-            let transformed_string = transform_fn(&string);
-            if transformed_string.eq(target.as_ref()) {
+            // extra parantheses to prevent "field, not a method" error
+            let transformed_string = (cp.transform_fn)(&string);
+            if transformed_string.eq(&cp.target) {
                 // let other threads know we are done
                 done.store(true, Ordering::SeqCst);
                 result = Some(string);
