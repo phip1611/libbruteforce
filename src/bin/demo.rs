@@ -1,7 +1,7 @@
 use libbruteforce::{crack, transform_fns, symbols, CrackParameter};
 
 fn main() {
-    let alphabet = symbols::full_alphabet();
+    let alphabet = symbols::Builder::new().full().build();
     // or let alphabet = symbols::build_alphabet(true, true, false, false, false, false, false)
     let input = String::from("a+c");
     let sha256_hash = String::from("3d7edde33628331676b39e19a3f2bdb3c583960ad8d865351a32e2ace7d8e02d");

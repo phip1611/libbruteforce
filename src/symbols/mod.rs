@@ -1,5 +1,10 @@
 //! This module contains prebuilt alphabets/symbols that you can use.
 
+mod builder;
+
+// export
+pub use builder::Builder;
+
 /// Latin Digits
 pub static DIGITS: [char; 10] = [
     '0', '1', '2', '3', '4', '5', '6', '7', '8', '9'
@@ -39,7 +44,8 @@ pub static ALL_OTHER_SPECIAL_CHARS: [char; 26] = [
     '/', 'µ'
 ];
 
-/// Shorthand for build_alphabet with all parameters set to true.
+/// Deprecated. Use `symbols::Builder` instead.
+#[deprecated]
 pub fn full_alphabet() -> Box<[char]> {
     build_alphabet(true,
                    true,
@@ -51,7 +57,8 @@ pub fn full_alphabet() -> Box<[char]> {
     )
 }
 
-/// Builds the alphabet from the given flags.
+/// Deprecated. Use `symbols::Builder` instead.
+#[deprecated]
 pub fn build_alphabet(lc_letters: bool,
                       up_letters: bool,
                       digits: bool,
@@ -113,7 +120,7 @@ mod tests {
             true, true, true,
         );
         assert_eq!(alphabet.len(), 10 + 26 + 26 + 3 + 3 + 16 + 26);
-        assert_eq!(alphabet.len(), full_alphabet().len());
+        assert_eq!(alphabet.len(), Builder::new().full().build().len());
     }
 
     #[test]
