@@ -5,15 +5,21 @@
 //! # Usage
 //!
 //! ```
-//! use libbruteforce::{crack, transform_fns, symbols, CrackParameter};
+//!  use libbruteforce::{symbols, transform_fns};
+//!  use libbruteforce::CrackParameter;
+//!  use libbruteforce::transform_fns::SHA256_HASHING;
 //!
-//! let alphabet = symbols::full_alphabet();
-//! // or let alphabet = symbols::build_alphabet(true, true, false, false, false, false, false)
-//! let input = String::from("a+c");
-//! let sha256_hash = String::from("3d7edde33628331676b39e19a3f2bdb3c583960ad8d865351a32e2ace7d8e02d");
-//! let cp = CrackParameter::new(sha256_hash.clone(), alphabet, 3, 0, transform_fns::SHA256_HASHING, true);
-//! let res = crack(cp);
-//! if res.is_success() { let sol = res.solution.unwrap(); }
+//!  let alphabet = symbols::Builder::new().with_lc_letters().with_common_special_chars().build();
+//!  let sha256_hash = String::from("3d7edde33628331676b39e19a3f2bdb3c583960ad8d865351a32e2ace7d8e02d");
+//!  // sha256("a+c")
+//!  let res = libbruteforce::crack(
+//!      CrackParameter::new(
+//!          sha256_hash.clone(), alphabet, 3, 0, transform_fns::SHA256_HASHING, true,
+//!      )
+//!  );
+//!  if res.is_success() {
+//!      println!("Password is: {}", res.solution.unwrap())
+//!  }
 //! ```
 
 pub use crack::crack;
@@ -22,7 +28,6 @@ pub use crack::parameter::CrackParameter;
 mod crack;
 mod util;
 
-// Public PAI
+// Public API
 pub mod symbols;
 pub mod transform_fns;
-

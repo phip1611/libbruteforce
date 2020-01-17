@@ -2,12 +2,12 @@
 //! a alphabet and a specified length. Can be used to compare systems and to
 //! check the effect of code changes/improvements.
 
-use libbruteforce::symbols::{full_alphabet, combinations_count};
+use libbruteforce::symbols::{Builder, combinations_count};
 use libbruteforce::CrackParameter;
 use libbruteforce::transform_fns::SHA256_HASHING;
 
 fn main() {
-    let alphabet = full_alphabet();
+    let alphabet = Builder::new().full().build();
     const MAX_LEN: u32 = 4;
     let mut target = String::new();
     let max_index = alphabet.len() - 1;
