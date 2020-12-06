@@ -1,4 +1,6 @@
 /target
+example/target
+example/Cargo.lock
 **/*.rs.bk
 .idea
 *.iml

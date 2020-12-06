@@ -6,6 +6,7 @@ use parameter::CrackParameter;
 use parameter::InternalCrackParameter;
 use result::CrackResult;
 use worker_threads::spawn_worker_threads;
+use crate::symbols::combinations_count;
 
 // Public API
 pub mod parameter;
@@ -19,12 +20,16 @@ mod worker_threads;
 /// set of transformation functions available, such as `transform_fns::NO_HASHING`, or
 /// `transform_fns::SHA256`. You can also provide your own function if it is compatible
 /// with `transform_fns::TransformFn`.
+///
+/// This library is really "dumb". It checks each possible value and doesn't use any probabilities
+/// for more or less probable passwords.
 pub fn crack(cp: CrackParameter) -> CrackResult {
     let cp = InternalCrackParameter::from(cp);
     let cp = Arc::from(cp);
 
     // shared atomic bool so that all threads can look if one already found a solution
-    // so they can stop their work
+    // so they can stop their work. This only gets checked at every millionth iteration
+    // for better performance.
     let done = Arc::from(AtomicBool::from(false));
     let instant = Instant::now();
     let handles = spawn_worker_threads(cp.clone(), done);

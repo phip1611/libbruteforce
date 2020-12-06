@@ -61,8 +61,9 @@ pub fn indices_word_length(indices: &Box<[isize]>) -> usize {
     n
 }
 
-/// Increments the indices array by a given number.v
-// small but notable performance gain
+/// Increments the indices array by a given number.
+/// Returns Ok() on next number or Err() on final
+/// overflow (=done).
 #[inline]
 pub fn indices_increment_by(
     alphabet: &Box<[char]>,
