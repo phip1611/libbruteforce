@@ -2,7 +2,6 @@ use std::sync::atomic::AtomicBool;
 use std::sync::Arc;
 use std::time::Instant;
 
-use crate::symbols::combinations_count;
 use parameter::CrackParameter;
 use parameter::InternalCrackParameter;
 use result::CrackResult;
@@ -45,8 +44,7 @@ pub fn crack(cp: CrackParameter) -> CrackResult {
     let seconds = instant.elapsed().as_millis() as f64 / 1000_f64;
 
     let cp = Arc::try_unwrap(cp).unwrap_or_else(|_| panic!("There should only be one reference!"));
-    if solution.is_some() {
-        let solution = solution.unwrap();
+    if let Some(solution) = solution {
         CrackResult::success(cp, seconds, solution)
     } else {
         CrackResult::failure(cp, seconds)

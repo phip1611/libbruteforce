@@ -42,7 +42,7 @@ fn main() {
     println!("{} iterations / s (per thread)", iterations_ps_pt as usize);
 }
 
-fn create_worst_case_search_password(alphabet: &Box<[char]>, len: u32) -> String {
+fn create_worst_case_search_password(alphabet: &[char], len: u32) -> String {
     let mut target = String::new();
     let max_index = alphabet.len() - 1;
     for _ in 0..len {

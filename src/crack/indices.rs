@@ -34,13 +34,12 @@ pub fn indices_create(max_length: u32, min_length: u32) -> Box<[isize]> {
 /// Transforms the indices array into a string using the alphabet.
 /// Empty slots will be skipped.
 #[inline] // small but notable performance gain
-pub fn indices_to_string(alphabet: &Box<[char]>, indices: &Box<[isize]>) -> String {
+pub fn indices_to_string(alphabet: &[char], indices: &[isize]) -> String {
     let mut word = String::new();
-    for i in 0..indices.len() {
-        let index = indices[i];
-        if index != -1 {
+    for index in indices {
+        if *index != -1 {
             // otherwise our string isn't so far that long
-            let symbol = alphabet[index as usize];
+            let symbol = alphabet[*index as usize];
             word.push(symbol);
         }
     }
@@ -49,7 +48,7 @@ pub fn indices_to_string(alphabet: &Box<[char]>, indices: &Box<[isize]>) -> Stri
 
 /// Calculates how many fields are not "-1" aka how long the word that is represented is.
 #[inline]
-pub fn indices_word_length(indices: &Box<[isize]>) -> usize {
+pub fn indices_word_length(indices: &[isize]) -> usize {
     let mut n = 0;
     let mut i = (indices.len() - 1) as isize;
     while i >= 0 {
@@ -68,7 +67,7 @@ pub fn indices_word_length(indices: &Box<[isize]>) -> usize {
 /// overflow (=done).
 #[inline]
 pub fn indices_increment_by(
-    alphabet: &Box<[char]>,
+    alphabet: &[char],
     indices: &mut Box<[isize]>,
     add_value: usize,
 ) -> Result<(), &'static str> {
@@ -96,7 +95,7 @@ pub fn indices_increment_by(
         if new_value >= alphabet.len() as isize {
             // carry for next position/next iteration
             carry = new_value as usize / alphabet.len();
-            new_value = new_value % (alphabet.len()) as isize;
+            new_value %= (alphabet.len()) as isize;
         } else {
             carry = 0;
         }
