@@ -19,7 +19,9 @@
 /// slots inside a word (they shall be marked with a space in
 /// the alphabet).
 pub fn indices_create(max_length: u32, min_length: u32) -> Box<[isize]> {
-    if min_length > max_length { panic!("max_length must be >= min_length") }
+    if min_length > max_length {
+        panic!("max_length must be >= min_length")
+    }
     // -1 means no symbol yet
     let mut slice = vec![-1; max_length as usize].into_boxed_slice();
     for i in 0..min_length {
@@ -68,7 +70,8 @@ pub fn indices_word_length(indices: &Box<[isize]>) -> usize {
 pub fn indices_increment_by(
     alphabet: &Box<[char]>,
     indices: &mut Box<[isize]>,
-    add_value: usize) -> Result<(), &'static str> {
+    add_value: usize,
+) -> Result<(), &'static str> {
     if add_value == 0 {
         // Nothing to do
         return Ok(());
@@ -109,7 +112,6 @@ pub fn indices_increment_by(
         Err("Overflow detected! Data/state is now invalid and no longer reliable!")
     }
 }
-
 
 #[cfg(test)]
 mod tests {
@@ -170,7 +172,7 @@ mod tests {
     #[test]
     fn test_increment_indices_array_add1_overflow() {
         let alphabet: Box<[char]> = Box::from(['0', '1']);
-        let mut arr = indices_create(5,0);
+        let mut arr = indices_create(5, 0);
         arr[3] = 1;
         arr[4] = 1;
         indices_increment_by(&alphabet, &mut arr, 1);
@@ -213,7 +215,7 @@ mod tests {
             Ok(_) => {
                 assert!(false, "fff with length 3 should not be incrementable!")
             }
-            _ => ()
+            _ => (),
         }
     }
 

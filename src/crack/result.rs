@@ -20,28 +20,30 @@ pub struct CrackResult {
 }
 
 impl CrackResult {
-
-    fn new(cp: InternalCrackParameter,
-           seconds_as_fraction: f64,
-           solution: Option<String>) -> CrackResult {
+    fn new(
+        cp: InternalCrackParameter,
+        seconds_as_fraction: f64,
+        solution: Option<String>,
+    ) -> CrackResult {
         CrackResult {
             target: cp.target,
             solution,
             thread_count: cp.thread_count,
             combinations_total: cp.combinations_total,
             combinations_p_t: cp.combinations_p_t,
-            seconds_as_fraction
+            seconds_as_fraction,
         }
     }
 
-    pub fn failure(cp: InternalCrackParameter,
-                   seconds_as_fraction: f64) -> CrackResult {
+    pub fn failure(cp: InternalCrackParameter, seconds_as_fraction: f64) -> CrackResult {
         CrackResult::new(cp, seconds_as_fraction, None)
     }
 
-    pub fn success(cp: InternalCrackParameter,
-                   seconds_as_fraction: f64,
-                   solution: String) -> CrackResult {
+    pub fn success(
+        cp: InternalCrackParameter,
+        seconds_as_fraction: f64,
+        solution: String,
+    ) -> CrackResult {
         CrackResult::new(cp, seconds_as_fraction, Some(solution))
     }
 
@@ -52,5 +54,4 @@ impl CrackResult {
     pub fn is_success(&self) -> bool {
         self.solution.is_some()
     }
-
 }
