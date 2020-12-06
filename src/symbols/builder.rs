@@ -35,12 +35,13 @@ impl Builder {
 
     /// Shorthand for all possible symbols.
     pub fn full(mut self) -> Builder {
-        self.with_all_special_chars()
-            .with_uc_umlauts()
-            .with_lc_umlauts()
-            .with_uc_letters()
+        // first letters and digits because they are more common
+        self.with_uc_letters()
             .with_lc_letters()
             .with_digits()
+            .with_all_special_chars()
+            .with_uc_umlauts()
+            .with_lc_umlauts()
     }
 
     /// Digits 0 to 9

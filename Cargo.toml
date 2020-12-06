@@ -1,6 +1,6 @@
 [package]
 name = "libbruteforce"
-version = "2.1.0"
+version = "2.1.1"
 authors = ["Philipp Schuster <phip1611@gmail.com>"]
 edition = "2018"
 license = "MIT"
@@ -20,7 +20,8 @@ categories = ["algorithms"]
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-num_cpus = "1.11.1"
+num_cpus = "1.13.0"
 md5 = "0.7.0"
 sha1 = "0.6.0"
-sha2 = "0.8.1"
+sha2 = "0.8.2"
+log = "0.4.11"
