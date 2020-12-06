@@ -56,16 +56,6 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_build_alphabet() {
-        let alphabet = build_alphabet(false, true, true, false, false, false, false);
-        assert_eq!(alphabet.len(), 36);
-
-        let alphabet = build_alphabet(true, true, true, true, true, true, true);
-        assert_eq!(alphabet.len(), 10 + 26 + 26 + 3 + 3 + 16 + 26);
-        assert_eq!(alphabet.len(), Builder::new().full().build().len());
-    }
-
-    #[test]
     fn test_combinations_count() {
         let alphabet1: Box<[char]> = Box::from(['a']);
         let alphabet2: Box<[char]> = Box::from(['a', 'b', 'c']);
