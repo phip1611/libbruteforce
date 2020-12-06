@@ -1,6 +1,6 @@
 [package]
 name = "libbruteforce"
-version = "2.2.1"
+version = "2.2.2"
 authors = ["Philipp Schuster <phip1611@gmail.com>"]
 edition = "2018"
 license = "MIT"
