@@ -1,12 +1,12 @@
-use std::sync::Arc;
 use std::sync::atomic::AtomicBool;
+use std::sync::Arc;
 use std::time::Instant;
 
+use crate::symbols::combinations_count;
 use parameter::CrackParameter;
 use parameter::InternalCrackParameter;
 use result::CrackResult;
 use worker_threads::spawn_worker_threads;
-use crate::symbols::combinations_count;
 
 // Public API
 pub mod parameter;
@@ -44,8 +44,7 @@ pub fn crack(cp: CrackParameter) -> CrackResult {
 
     let seconds = instant.elapsed().as_millis() as f64 / 1000_f64;
 
-    let cp = Arc::try_unwrap(cp)
-        .unwrap_or_else(|_| panic!("There should only be one reference!"));
+    let cp = Arc::try_unwrap(cp).unwrap_or_else(|_| panic!("There should only be one reference!"));
     if solution.is_some() {
         let solution = solution.unwrap();
         CrackResult::success(cp, seconds, solution)
@@ -85,7 +84,10 @@ mod tests {
 
         let res = crack(cp);
         assert!(res.is_success(), "A solution MUST be found!");
-        assert!(input.eq(res.solution.as_ref().unwrap()), "The cracked value is wrong! It's");
+        assert!(
+            input.eq(res.solution.as_ref().unwrap()),
+            "The cracked value is wrong! It's"
+        );
 
         if num_cpus::get() > 1 {
             assert!(cp_fair.fair_mode, "Fair mode must be activated"); // check if really multiple threads are used
@@ -97,7 +99,10 @@ mod tests {
                 input.eq(res.solution.as_ref().unwrap()),
                 "The cracked value is wrong!"
             );
-            assert!(res.thread_count > res_fair.thread_count, "fair mode must use less treads!");
+            assert!(
+                res.thread_count > res_fair.thread_count,
+                "fair mode must use less treads!"
+            );
         }
     }
 }

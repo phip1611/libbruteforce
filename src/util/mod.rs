@@ -21,7 +21,7 @@ pub fn create_test_crack_params_full_alphabet(target: &String) -> CrackParameter
         max_len,
         min_len,
         NO_HASHING,
-        false
+        false,
     )
 }
 
@@ -36,7 +36,7 @@ pub fn create_test_crack_params_full_alphabet_sha256(target: &String) -> CrackPa
         max_len,
         min_len,
         SHA256_HASHING,
-        false
+        false,
     )
 }
 
@@ -51,6 +51,6 @@ pub fn create_test_crack_params_full_alphabet_sha256_fair(target: &String) -> Cr
         max_len,
         min_len,
         SHA256_HASHING,
-        true
+        true,
     )
 }

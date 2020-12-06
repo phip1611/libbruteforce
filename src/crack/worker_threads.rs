@@ -1,40 +1,38 @@
 //! All functions related for the multithreaded cracking process.
 //! The actual cracking happens here.
 
-use std::sync::Arc;
+use log::{info, trace};
 use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::Arc;
 use std::thread;
 use std::thread::JoinHandle;
-use log::{trace, info};
 
 use crate::crack::indices::{indices_create, indices_increment_by, indices_to_string};
 use crate::crack::parameter::InternalCrackParameter;
 
 /// Spawns all worker threads.
-pub fn spawn_worker_threads(cp: Arc<InternalCrackParameter>,
-                            done: Arc<AtomicBool>) -> Vec<JoinHandle<Option<String>>> {
+pub fn spawn_worker_threads(
+    cp: Arc<InternalCrackParameter>,
+    done: Arc<AtomicBool>,
+) -> Vec<JoinHandle<Option<String>>> {
     let mut handles = vec![];
     // spawn thread for each cpu
     for tid in 0..cp.thread_count {
         let mut indices = indices_create(cp.max_length, cp.min_length);
         // prepare array for thread with right starting index
         indices_increment_by(&cp.alphabet, &mut indices, tid).expect("Increment failed");
-        handles.push(
-            spawn_worker_thread(
-                cp.clone(),
-                done.clone(),
-                indices,
-                tid)
-        );
+        handles.push(spawn_worker_thread(cp.clone(), done.clone(), indices, tid));
     }
     handles
 }
 
 /// Spawns a worker thread with its work loop.
-fn spawn_worker_thread(cp: Arc<InternalCrackParameter>,
-                       done: Arc<AtomicBool>,
-                       indices: Box<[isize]>,
-                       tid: usize) -> JoinHandle<Option<String>> {
+fn spawn_worker_thread(
+    cp: Arc<InternalCrackParameter>,
+    done: Arc<AtomicBool>,
+    indices: Box<[isize]>,
+    tid: usize,
+) -> JoinHandle<Option<String>> {
     // mark var as mutable for compiler
     let mut indices = indices;
 
@@ -62,14 +60,21 @@ fn spawn_worker_thread(cp: Arc<InternalCrackParameter>,
                     trace!("Thread {:>2} stops at {:>6.2}% progress because another thread found a solution", tid, get_percent(&cp, iteration_count));
                     break;
                 } else {
-                    trace!("Thread {:>2} is at {:>6.2}% progress", tid, get_percent(&cp, iteration_count));
+                    trace!(
+                        "Thread {:>2} is at {:>6.2}% progress",
+                        tid,
+                        get_percent(&cp, iteration_count)
+                    );
                 }
             }
             interrupt_count -= 1;
 
             let res = indices_increment_by(&cp.alphabet, &mut indices, cp.thread_count);
             if res.is_err() {
-                info!("Thread {:>2} checked all possible values without finding a solution. Done.", tid);
+                info!(
+                    "Thread {:>2} checked all possible values without finding a solution. Done.",
+                    tid
+                );
                 break;
             }
 
@@ -80,7 +85,11 @@ fn spawn_worker_thread(cp: Arc<InternalCrackParameter>,
             // extra parentheses to prevent "field, not a method" error
             let transformed_string = (cp.transform_fn)(&string);
             if transformed_string.eq(&cp.target) {
-                info!("Thread {:>2} found a solution at a progress of {:>6.2}%!", tid, get_percent(&cp, iteration_count));
+                info!(
+                    "Thread {:>2} found a solution at a progress of {:>6.2}%!",
+                    tid,
+                    get_percent(&cp, iteration_count)
+                );
                 // let other threads know we are done
                 done.store(true, Ordering::Relaxed);
                 result = Some(string);

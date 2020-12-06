@@ -47,9 +47,9 @@ mod tests {
     #[test]
     fn test_sha256() {
         let input = String::from("Hello World");
-        let expected = String::from("a591a6d40bf420404a011733cfb7b190d62c65bf0bcda32b57b277d9ad9f146e");
+        let expected =
+            String::from("a591a6d40bf420404a011733cfb7b190d62c65bf0bcda32b57b277d9ad9f146e");
         let transformed = SHA256_HASHING(&input);
         assert!(expected.eq(&transformed), "Sha256 hashes should equal!")
     }
-
 }

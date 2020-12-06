@@ -22,12 +22,14 @@ pub struct CrackParameter {
 }
 
 impl CrackParameter {
-    pub fn new(target: String,
-           alphabet: Box<[char]>,
-           max_length: u32,
-           min_length: u32,
-           transform_fn: TransformFn,
-           fair_mode: bool) -> CrackParameter {
+    pub fn new(
+        target: String,
+        alphabet: Box<[char]>,
+        max_length: u32,
+        min_length: u32,
+        transform_fn: TransformFn,
+        fair_mode: bool,
+    ) -> CrackParameter {
         CrackParameter {
             target,
             alphabet,
@@ -63,7 +65,6 @@ pub struct InternalCrackParameter {
 }
 
 impl From<CrackParameter> for InternalCrackParameter {
-
     /// Creates the object used internally for the cracking process from
     /// what the user/programmer has given the lib through the public api.
     fn from(cp: CrackParameter) -> Self {

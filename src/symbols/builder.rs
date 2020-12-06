@@ -1,4 +1,7 @@
-use crate::symbols::{DIGITS, UC_LETTERS, LC_LETTERS, UC_UMLAUTS, LC_UMLAUTS, COMMON_SPECIAL_CHARS, ALL_OTHER_SPECIAL_CHARS};
+use crate::symbols::{
+    ALL_OTHER_SPECIAL_CHARS, COMMON_SPECIAL_CHARS, DIGITS, LC_LETTERS, LC_UMLAUTS, UC_LETTERS,
+    UC_UMLAUTS,
+};
 
 /// This is a builder to help you in a convenient way
 /// to build a alphabet based on common chars built-in
@@ -18,7 +21,6 @@ pub struct Builder {
 }
 
 impl Builder {
-
     /// Creates a new empty builder instance.
     pub fn new() -> Builder {
         Builder {
@@ -55,14 +57,12 @@ impl Builder {
 
     /// Letters A-z. Shorthand for `with_lc_letters()` and `with_uc_letters()`.
     pub fn with_letters(mut self) -> Builder {
-        self.with_lc_letters()
-            .with_uc_letters()
+        self.with_lc_letters().with_uc_letters()
     }
 
     /// Letters ÄÖÜäöü. Shorthand for `with_lc_umlauts()` and `with_uc_umlauts()`.
     pub fn with_umlauts(mut self) -> Builder {
-        self.with_lc_umlauts()
-            .with_uc_umlauts()
+        self.with_lc_umlauts().with_uc_umlauts()
     }
 
     /// Letters A-Z
@@ -141,12 +141,16 @@ impl Builder {
 #[cfg(test)]
 mod tests {
     use crate::symbols::builder::Builder;
-    use crate::symbols::{DIGITS, LC_LETTERS, UC_LETTERS, LC_UMLAUTS, UC_UMLAUTS, ALL_OTHER_SPECIAL_CHARS, COMMON_SPECIAL_CHARS};
+    use crate::symbols::{
+        ALL_OTHER_SPECIAL_CHARS, COMMON_SPECIAL_CHARS, DIGITS, LC_LETTERS, LC_UMLAUTS, UC_LETTERS,
+        UC_UMLAUTS,
+    };
 
     #[test]
     fn test_build() {
         let mut builder = Builder::new();
-        let alphabet = builder.with_digits()
+        let alphabet = builder
+            .with_digits()
             .with_uc_letters()
             .with_lc_letters()
             .with_uc_umlauts()
@@ -156,9 +160,15 @@ mod tests {
             .build();
         let alphabet_2 = Builder::new().full().build();
 
-        assert_eq!(alphabet.len(), DIGITS.len() + LC_LETTERS.len() + UC_LETTERS.len() +
-            LC_UMLAUTS.len() + UC_UMLAUTS.len() + ALL_OTHER_SPECIAL_CHARS.len() +
-            COMMON_SPECIAL_CHARS.len()
+        assert_eq!(
+            alphabet.len(),
+            DIGITS.len()
+                + LC_LETTERS.len()
+                + UC_LETTERS.len()
+                + LC_UMLAUTS.len()
+                + UC_UMLAUTS.len()
+                + ALL_OTHER_SPECIAL_CHARS.len()
+                + COMMON_SPECIAL_CHARS.len()
         );
         assert_eq!(alphabet.len(), alphabet_2.len());
     }
@@ -179,10 +189,12 @@ mod tests {
             .build();
 
         let mut builder = Builder::new();
-        let alphabet2 = builder
-            .with_all_special_chars()
-            .build();
+        let alphabet2 = builder.with_all_special_chars().build();
 
-        assert_eq!(alphabet.len(), alphabet2.len(), "all special chars must be contained!");
+        assert_eq!(
+            alphabet.len(),
+            alphabet2.len(),
+            "all special chars must be contained!"
+        );
     }
 }
