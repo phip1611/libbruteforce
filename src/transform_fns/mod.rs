@@ -11,7 +11,7 @@ mod sha256;
 
 /// This type describes functions used to transform the current guess during the bruteforce run
 /// before it is compared to the target value. This can be a hashing algorithm for example.
-pub type TransformFn = fn(&String) -> String;
+pub type TransformFn = fn(&str) -> String;
 
 #[cfg(test)]
 mod tests {

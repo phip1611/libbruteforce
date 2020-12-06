@@ -36,7 +36,7 @@ impl Builder {
     }
 
     /// Shorthand for all possible symbols.
-    pub fn full(mut self) -> Builder {
+    pub fn full(self) -> Builder {
         // first letters and digits because they are more common
         self.with_uc_letters()
             .with_lc_letters()
@@ -56,12 +56,12 @@ impl Builder {
     }
 
     /// Letters A-z. Shorthand for `with_lc_letters()` and `with_uc_letters()`.
-    pub fn with_letters(mut self) -> Builder {
+    pub fn with_letters(self) -> Builder {
         self.with_lc_letters().with_uc_letters()
     }
 
     /// Letters ÄÖÜäöü. Shorthand for `with_lc_umlauts()` and `with_uc_umlauts()`.
-    pub fn with_umlauts(mut self) -> Builder {
+    pub fn with_umlauts(self) -> Builder {
         self.with_lc_umlauts().with_uc_umlauts()
     }
 
@@ -120,7 +120,7 @@ impl Builder {
     }
 
     /// Shorthand for `with_all_other_special_chars` and `with_common_special_chars`.
-    pub fn with_all_special_chars(mut self) -> Builder {
+    pub fn with_all_special_chars(self) -> Builder {
         self.with_common_special_chars()
             .with_all_other_special_chars()
     }

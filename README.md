@@ -20,7 +20,6 @@ performance is really bad.
 ```rust
 use libbruteforce::{symbols, transform_fns};
 use libbruteforce::CrackParameter;
-use libbruteforce::transform_fns::SHA256_HASHING;
 use simple_logger::SimpleLogger;
 
 fn main() {
