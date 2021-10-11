@@ -11,8 +11,8 @@ use crate::crack::indices::{indices_create, indices_increment_by, indices_to_str
 use crate::crack::parameter::InternalCrackParameter;
 
 /// Spawns all worker threads.
-pub fn spawn_worker_threads(
-    cp: Arc<InternalCrackParameter>,
+pub fn spawn_worker_threads<T: 'static + Eq + Send + Sync>(
+    cp: Arc<InternalCrackParameter<T>>,
     done: Arc<AtomicBool>,
 ) -> Vec<JoinHandle<Option<String>>> {
     let mut handles = vec![];
@@ -27,8 +27,8 @@ pub fn spawn_worker_threads(
 }
 
 /// Spawns a worker thread with its work loop.
-fn spawn_worker_thread(
-    cp: Arc<InternalCrackParameter>,
+fn spawn_worker_thread<T: 'static + Eq + Send + Sync>(
+    cp: Arc<InternalCrackParameter<T>>,
     done: Arc<AtomicBool>,
     indices: Box<[isize]>,
     tid: usize,
@@ -100,7 +100,10 @@ fn spawn_worker_thread(
     })
 }
 
-fn get_percent(cp: &Arc<InternalCrackParameter>, iteration_count: usize) -> f64 {
+fn get_percent<T: 'static + Eq + Send + Sync>(
+    cp: &Arc<InternalCrackParameter<T>>,
+    iteration_count: usize,
+) -> f64 {
     let total = cp.combinations_p_t as f64;
     let current = iteration_count as f64;
     current / total * 100_f64

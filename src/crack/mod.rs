@@ -22,7 +22,7 @@ mod worker_threads;
 ///
 /// This library is really "dumb". It checks each possible value and doesn't use any probabilities
 /// for more or less probable passwords.
-pub fn crack(cp: CrackParameter) -> CrackResult {
+pub fn crack<T: 'static + Eq + Send + Sync>(cp: CrackParameter<T>) -> CrackResult<T> {
     let cp = InternalCrackParameter::from(cp);
     let cp = Arc::from(cp);
 
@@ -37,8 +37,7 @@ pub fn crack(cp: CrackParameter) -> CrackResult {
     let solution = handles
         .into_iter()
         .map(|h| h.join().unwrap()) // result of the Option<String> from the threads
-        .filter(|h| h.is_some()) // filter the result
-        .map(|o| o.unwrap()) // map to the actual value
+        .flatten()
         .last(); // extract from the collection
 
     let seconds = instant.elapsed().as_millis() as f64 / 1000_f64;
@@ -65,7 +64,7 @@ mod tests {
         let res = crack(cp);
         assert!(res.is_success(), "a solution must be found!");
         assert!(
-            target.eq(res.solution.as_ref().unwrap()),
+            input.eq(res.solution.as_ref().unwrap()),
             "target and cracked result must equal!"
         );
     }

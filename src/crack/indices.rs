@@ -47,6 +47,7 @@ pub fn indices_to_string(alphabet: &[char], indices: &[isize]) -> String {
 }
 
 /// Calculates how many fields are not "-1" aka how long the word that is represented is.
+#[allow(dead_code)]
 #[inline]
 pub fn indices_word_length(indices: &[isize]) -> usize {
     let mut n = 0;
@@ -174,7 +175,7 @@ mod tests {
         let mut arr = indices_create(5, 0);
         arr[3] = 1;
         arr[4] = 1;
-        indices_increment_by(&alphabet, &mut arr, 1);
+        indices_increment_by(&alphabet, &mut arr, 1).unwrap();
         assert_eq!(arr[0], -1, "after '11' comes '000'");
         assert_eq!(arr[1], -1, "after '11' comes '000'");
         assert_eq!(arr[2], 0, "after '11' comes '000'");
@@ -189,7 +190,7 @@ mod tests {
         arr[2] = 3;
         arr[3] = 5;
         arr[4] = 5;
-        indices_increment_by(&alphabet, &mut arr, 1);
+        indices_increment_by(&alphabet, &mut arr, 1).unwrap();
         assert_eq!(arr[2], 4, "after 'ffd' comes 'ffe'");
         assert_eq!(arr[3], 0, "after 'ffd' comes 'ffe'");
         assert_eq!(arr[4], 0, "after 'ffd' comes 'ffe'");
@@ -199,7 +200,7 @@ mod tests {
     fn test_increment_indices_array_add1_initial() {
         let alphabet: Box<[char]> = Box::from(['a', 'b']);
         let mut arr = indices_create(5, 0);
-        indices_increment_by(&alphabet, &mut arr, 1);
+        indices_increment_by(&alphabet, &mut arr, 1).unwrap();
         assert_eq!(arr[4], 0, "after () comes 'a'");
     }
 
@@ -210,12 +211,10 @@ mod tests {
         arr[0] = 5;
         arr[1] = 5;
         arr[2] = 5;
-        match indices_increment_by(&alphabet, &mut arr, 1) {
-            Ok(_) => {
-                assert!(false, "fff with length 3 should not be incrementable!")
-            }
-            _ => (),
-        }
+        assert!(
+            indices_increment_by(&alphabet, &mut arr, 1).is_err(),
+            "fff with length 3 should not be incrementable!"
+        )
     }
 
     #[test]
@@ -226,7 +225,7 @@ mod tests {
         // should make -1 -1 -1 to 2 2 2
         // minus one because we are already at the first element (-1, -1, -1)
         let steps = combinations_count(&alphabet, len, 0) - 1;
-        indices_increment_by(&alphabet, &mut indices, steps);
+        indices_increment_by(&alphabet, &mut indices, steps).unwrap();
         for i in 0..len {
             assert_eq!(indices[i as usize], (alphabet.len() - 1) as isize)
         }
@@ -238,9 +237,9 @@ mod tests {
         let length = 5;
         let mut indices = indices_create(length, 0);
         assert_eq!(0, indices_word_length(&indices));
-        indices_increment_by(&alphabet, &mut indices, 1);
+        indices_increment_by(&alphabet, &mut indices, 1).unwrap();
         assert_eq!(1, indices_word_length(&indices));
-        indices_increment_by(&alphabet, &mut indices, 4);
+        indices_increment_by(&alphabet, &mut indices, 4).unwrap();
         assert_eq!(length as usize, indices_word_length(&indices));
     }
 }

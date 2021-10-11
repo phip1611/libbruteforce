@@ -3,9 +3,9 @@
 use crate::crack::parameter::InternalCrackParameter;
 
 /// Describes the result of a finished cracking process.
-pub struct CrackResult {
+pub struct CrackResult<T: 'static + Eq + Send + Sync> {
     /// the target string
-    pub target: String,
+    pub target: T,
     /// The solution to the target string
     pub solution: Option<String>,
     pub thread_count: usize,
@@ -19,12 +19,12 @@ pub struct CrackResult {
     pub seconds_as_fraction: f64,
 }
 
-impl CrackResult {
+impl<T: 'static + Eq + Send + Sync> CrackResult<T> {
     fn new(
-        cp: InternalCrackParameter,
+        cp: InternalCrackParameter<T>,
         seconds_as_fraction: f64,
         solution: Option<String>,
-    ) -> CrackResult {
+    ) -> CrackResult<T> {
         CrackResult {
             target: cp.target,
             solution,
@@ -35,15 +35,15 @@ impl CrackResult {
         }
     }
 
-    pub fn failure(cp: InternalCrackParameter, seconds_as_fraction: f64) -> CrackResult {
+    pub fn failure(cp: InternalCrackParameter<T>, seconds_as_fraction: f64) -> CrackResult<T> {
         CrackResult::new(cp, seconds_as_fraction, None)
     }
 
     pub fn success(
-        cp: InternalCrackParameter,
+        cp: InternalCrackParameter<T>,
         seconds_as_fraction: f64,
         solution: String,
-    ) -> CrackResult {
+    ) -> CrackResult<T> {
         CrackResult::new(cp, seconds_as_fraction, Some(solution))
     }
 

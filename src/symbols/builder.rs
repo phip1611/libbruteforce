@@ -1,3 +1,5 @@
+use std::collections::HashSet;
+
 use crate::symbols::{
     ALL_OTHER_SPECIAL_CHARS, COMMON_SPECIAL_CHARS, DIGITS, LC_LETTERS, LC_UMLAUTS, UC_LETTERS,
     UC_UMLAUTS,
@@ -9,34 +11,19 @@ use crate::symbols::{
 ///
 /// This builder is optional and not required to build
 /// a alphabet for the lib.
+#[derive(Default)]
 pub struct Builder {
-    chars: Vec<char>,
-    added_digits: bool,
-    added_lc_letters: bool,
-    added_uc_letters: bool,
-    added_lc_umlauts: bool,
-    added_uc_umlauts: bool,
-    added_common_special_chars: bool,
-    added_all_other_special_chars: bool,
+    chars: HashSet<char>,
 }
 
 impl Builder {
     /// Creates a new empty builder instance.
-    pub fn new() -> Builder {
-        Builder {
-            chars: vec![],
-            added_digits: false,
-            added_lc_letters: false,
-            added_uc_letters: false,
-            added_lc_umlauts: false,
-            added_uc_umlauts: false,
-            added_common_special_chars: false,
-            added_all_other_special_chars: false,
-        }
+    pub fn new() -> Self {
+        Builder::default()
     }
 
     /// Shorthand for all possible symbols.
-    pub fn full(self) -> Builder {
+    pub fn full(self) -> Self {
         // first letters and digits because they are more common
         self.with_uc_letters()
             .with_lc_letters()
@@ -47,82 +34,67 @@ impl Builder {
     }
 
     /// Digits 0 to 9
-    pub fn with_digits(mut self) -> Builder {
-        if !self.added_digits {
-            self.added_digits = true;
-            self.chars.extend_from_slice(&DIGITS);
-        }
+    pub fn with_digits(mut self) -> Self {
+        self.chars.extend(DIGITS);
         self
     }
 
     /// Letters A-z. Shorthand for `with_lc_letters()` and `with_uc_letters()`.
-    pub fn with_letters(self) -> Builder {
+    pub fn with_letters(self) -> Self {
         self.with_lc_letters().with_uc_letters()
     }
 
     /// Letters ÄÖÜäöü. Shorthand for `with_lc_umlauts()` and `with_uc_umlauts()`.
-    pub fn with_umlauts(self) -> Builder {
+    pub fn with_umlauts(self) -> Self {
         self.with_lc_umlauts().with_uc_umlauts()
     }
 
     /// Letters A-Z
-    pub fn with_uc_letters(mut self) -> Builder {
-        if !self.added_uc_letters {
-            self.added_uc_letters = true;
-            self.chars.extend_from_slice(&UC_LETTERS);
-        }
+    pub fn with_uc_letters(mut self) -> Self {
+        self.chars.extend(&UC_LETTERS);
         self
     }
 
     /// Letters a-z
-    pub fn with_lc_letters(mut self) -> Builder {
-        if !self.added_lc_letters {
-            self.added_lc_letters = true;
-            self.chars.extend_from_slice(&LC_LETTERS);
-        }
+    pub fn with_lc_letters(mut self) -> Self {
+        self.chars.extend(&LC_LETTERS);
+
         self
     }
 
     /// Letters ÄÖÜ
-    pub fn with_uc_umlauts(mut self) -> Builder {
-        if !self.added_uc_umlauts {
-            self.added_uc_umlauts = true;
-            self.chars.extend_from_slice(&UC_UMLAUTS);
-        }
+    pub fn with_uc_umlauts(mut self) -> Self {
+        self.chars.extend(&UC_UMLAUTS);
         self
     }
 
     /// Letters äöü
-    pub fn with_lc_umlauts(mut self) -> Builder {
-        if !self.added_lc_umlauts {
-            self.added_lc_umlauts = true;
-            self.chars.extend_from_slice(&LC_UMLAUTS);
-        }
+    pub fn with_lc_umlauts(mut self) -> Self {
+        self.chars.extend(&LC_UMLAUTS);
         self
     }
 
     /// Common special chars on QWERTZ layout, see `COMMON_SPECIAL_CHARS`.
-    pub fn with_common_special_chars(mut self) -> Builder {
-        if !self.added_common_special_chars {
-            self.added_common_special_chars = true;
-            self.chars.extend_from_slice(&COMMON_SPECIAL_CHARS);
-        }
+    pub fn with_common_special_chars(mut self) -> Self {
+        self.chars.extend(&COMMON_SPECIAL_CHARS);
         self
     }
 
     /// Other special chars on QWERTZ layout, see `ALL_OTHER_SPECIAL_CHARS`.
-    pub fn with_all_other_special_chars(mut self) -> Builder {
-        if !self.added_all_other_special_chars {
-            self.added_all_other_special_chars = true;
-            self.chars.extend_from_slice(&ALL_OTHER_SPECIAL_CHARS);
-        }
+    pub fn with_all_other_special_chars(mut self) -> Self {
+        self.chars.extend(&ALL_OTHER_SPECIAL_CHARS);
         self
     }
 
     /// Shorthand for `with_all_other_special_chars` and `with_common_special_chars`.
-    pub fn with_all_special_chars(self) -> Builder {
+    pub fn with_all_special_chars(self) -> Self {
         self.with_common_special_chars()
             .with_all_other_special_chars()
+    }
+
+    pub fn with_char(mut self, c: char) -> Self {
+        self.chars.insert(c);
+        self
     }
 
     /// Builds the alphabet.
@@ -130,7 +102,8 @@ impl Builder {
         if self.chars.is_empty() {
             panic!("Alphabet is empty!")
         }
-        self.chars.into_boxed_slice()
+        let v: Vec<_> = self.chars.into_iter().collect();
+        v.into_boxed_slice()
     }
 
     pub fn is_empty(&self) -> bool {
@@ -148,8 +121,7 @@ mod tests {
 
     #[test]
     fn test_build() {
-        let mut builder = Builder::new();
-        let alphabet = builder
+        let alphabet = Builder::new()
             .with_digits()
             .with_uc_letters()
             .with_lc_letters()
@@ -182,14 +154,12 @@ mod tests {
 
     #[test]
     fn test_build_special_chars() {
-        let mut builder = Builder::new();
-        let alphabet = builder
+        let alphabet = Builder::new()
             .with_common_special_chars()
             .with_all_other_special_chars()
             .build();
 
-        let mut builder = Builder::new();
-        let alphabet2 = builder.with_all_special_chars().build();
+        let alphabet2 = Builder::new().with_all_special_chars().build();
 
         assert_eq!(
             alphabet.len(),

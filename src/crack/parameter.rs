@@ -6,9 +6,9 @@ use crate::transform_fns::TransformFn;
 
 /// Describes the necessary parameters for the `crack`-function. This is part of
 /// the public API.
-pub struct CrackParameter {
+pub struct CrackParameter<T: 'static + Eq + Send + Sync> {
     /// hash to crack
-    pub target: String,
+    pub target: T,
     /// all symbols (letters, digits, ...)
     pub alphabet: Box<[char]>,
     /// maximum crack length (to limit possible combinations)
@@ -16,20 +16,20 @@ pub struct CrackParameter {
     /// minimum crack length (to limit possible combinations)
     pub min_length: u32,
     /// hashing function
-    pub transform_fn: TransformFn,
+    pub transform_fn: TransformFn<T>,
     /// use n-1 threads to save system resources
     pub fair_mode: bool,
 }
 
-impl CrackParameter {
+impl<T: 'static + Eq + Send + Sync> CrackParameter<T> {
     pub fn new(
-        target: String,
+        target: T,
         alphabet: Box<[char]>,
         max_length: u32,
         min_length: u32,
-        transform_fn: TransformFn,
+        transform_fn: TransformFn<T>,
         fair_mode: bool,
-    ) -> CrackParameter {
+    ) -> CrackParameter<T> {
         CrackParameter {
             target,
             alphabet,
@@ -43,9 +43,9 @@ impl CrackParameter {
 
 /// Describes the necessary parameters for internal use inside the `crack`-function.
 /// This struct will be build from ```CrackParameter```.
-pub struct InternalCrackParameter {
+pub struct InternalCrackParameter<T: 'static + Eq + Send + Sync> {
     /// hash to crack
-    pub target: String,
+    pub target: T,
     /// all symbols (letters, digits, ...)
     pub alphabet: Box<[char]>,
     /// maximum crack length (to limit possible combinations)
@@ -53,7 +53,7 @@ pub struct InternalCrackParameter {
     /// minimum crack length (to limit possible combinations)
     pub min_length: u32,
     /// hashing function
-    pub transform_fn: TransformFn,
+    pub transform_fn: TransformFn<T>,
     /// thread count
     pub thread_count: usize,
     /// total combinations (given by alphabet and length)
@@ -64,10 +64,10 @@ pub struct InternalCrackParameter {
     pub combinations_p_t: usize,
 }
 
-impl From<CrackParameter> for InternalCrackParameter {
+impl<T: 'static + Eq + Send + Sync> From<CrackParameter<T>> for InternalCrackParameter<T> {
     /// Creates the object used internally for the cracking process from
     /// what the user/programmer has given the lib through the public api.
-    fn from(cp: CrackParameter) -> Self {
+    fn from(cp: CrackParameter<T>) -> Self {
         let combinations_total = combinations_count(&cp.alphabet, cp.max_length, cp.min_length);
         let thread_count = get_thread_count(cp.fair_mode);
         let combinations_p_t = combinations_total / thread_count;
