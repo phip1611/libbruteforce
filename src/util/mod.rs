@@ -8,12 +8,7 @@
 
 use crate::crack::parameter::CrackParameter;
 use crate::symbols::Builder;
-use crate::transform_fns::{
-    str_to_sha256_hash,
-    Sha256Hash,
-    NO_HASHING,
-    SHA256_HASHING,
-};
+use crate::transform_fns::{str_to_sha256_hash, Sha256Hash, NO_HASHING, SHA256_HASHING};
 
 /// Creates CrackParameter for full alphabet with identity hashing.
 #[allow(dead_code)]

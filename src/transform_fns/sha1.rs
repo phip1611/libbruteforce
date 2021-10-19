@@ -1,8 +1,4 @@
-use sha1::{
-    digest::generic_array::GenericArray,
-    Digest,
-    Sha1,
-};
+use sha1::{digest::generic_array::GenericArray, Digest, Sha1};
 
 use crate::transform_fns::TransformFn;
 

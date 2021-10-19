@@ -1,10 +1,7 @@
 //! The readme.md example and the example in lib.rs module description.
 
 use libbruteforce::symbols;
-use libbruteforce::transform_fns::{
-    str_to_sha256_hash,
-    SHA256_HASHING,
-};
+use libbruteforce::transform_fns::{str_to_sha256_hash, SHA256_HASHING};
 use libbruteforce::CrackParameter;
 use simple_logger::SimpleLogger;
 

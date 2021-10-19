@@ -1,23 +1,13 @@
 //! All functions related for the multithreaded cracking process.
 //! The actual cracking happens here.
 
-use log::{
-    info,
-    trace,
-};
-use std::sync::atomic::{
-    AtomicBool,
-    Ordering,
-};
+use log::{info, trace};
+use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
 use std::thread;
 use std::thread::JoinHandle;
 
-use crate::crack::indices::{
-    indices_create,
-    indices_increment_by,
-    indices_to_string,
-};
+use crate::crack::indices::{indices_create, indices_increment_by, indices_to_string};
 use crate::crack::parameter::InternalCrackParameter;
 use crate::CrackTarget;
 

@@ -4,14 +4,8 @@
 //!
 //! PS: RUN THIS IN RELEASE MODE (= a lot faster). `cargo run --bin bench --release`
 
-use libbruteforce::symbols::{
-    combinations_count,
-    Builder,
-};
-use libbruteforce::transform_fns::{
-    sha256_hash_to_hex_string,
-    SHA256_HASHING,
-};
+use libbruteforce::symbols::{combinations_count, Builder};
+use libbruteforce::transform_fns::{sha256_hash_to_hex_string, SHA256_HASHING};
 use libbruteforce::CrackParameter;
 use simple_logger::SimpleLogger;
 

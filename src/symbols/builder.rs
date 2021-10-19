@@ -1,12 +1,7 @@
 use std::collections::BTreeSet;
 
 use crate::symbols::{
-    ALL_OTHER_SPECIAL_CHARS,
-    COMMON_SPECIAL_CHARS,
-    DIGITS,
-    LC_LETTERS,
-    LC_UMLAUTS,
-    UC_LETTERS,
+    ALL_OTHER_SPECIAL_CHARS, COMMON_SPECIAL_CHARS, DIGITS, LC_LETTERS, LC_UMLAUTS, UC_LETTERS,
     UC_UMLAUTS,
 };
 
@@ -124,12 +119,7 @@ impl Builder {
 mod tests {
     use crate::symbols::builder::Builder;
     use crate::symbols::{
-        ALL_OTHER_SPECIAL_CHARS,
-        COMMON_SPECIAL_CHARS,
-        DIGITS,
-        LC_LETTERS,
-        LC_UMLAUTS,
-        UC_LETTERS,
+        ALL_OTHER_SPECIAL_CHARS, COMMON_SPECIAL_CHARS, DIGITS, LC_LETTERS, LC_UMLAUTS, UC_LETTERS,
         UC_UMLAUTS,
     };
 

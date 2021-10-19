@@ -4,10 +4,7 @@
 use crate::symbols::combinations_count;
 use crate::transform_fns::TransformFn;
 use crate::CrackTarget;
-use std::fmt::{
-    Debug,
-    Formatter,
-};
+use std::fmt::{Debug, Formatter};
 
 /// Describes the necessary parameters for the `crack`-function. This is part of
 /// the public API.

@@ -20,11 +20,7 @@ mod tests {
     use crate::transform_fns::md5::MD5_HASHING;
     use crate::transform_fns::sha1::SHA1_HASHING;
     use crate::transform_fns::sha256::SHA256_HASHING;
-    use crate::transform_fns::{
-        str_to_md5_hash,
-        str_to_sha1_hash,
-        str_to_sha256_hash,
-    };
+    use crate::transform_fns::{str_to_md5_hash, str_to_sha1_hash, str_to_sha256_hash};
 
     #[test]
     fn test_identity() {
