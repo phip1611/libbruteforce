@@ -56,9 +56,32 @@ pub fn crack<T: CrackTarget>(cp: CrackParameter<T>) -> CrackResult<T> {
 
 #[cfg(test)]
 mod tests {
+    use crate::transform_fns::NO_HASHING;
     use crate::util;
 
     use super::*;
+
+    #[test]
+    #[should_panic]
+    fn test_crack_should_panic_1() {
+        let input = String::from("a+c");
+        let cp = CrackParameter::new(input, vec!['a'].into_boxed_slice(), 4, 5, NO_HASHING, false);
+        // expect panic; min > max
+        let _res = crack(cp);
+    }
+
+    #[test]
+
+    fn test_crack_dont_find_bc_of_min_length() {
+        let input = String::from("a+c");
+        let cp = CrackParameter::new(input, vec!['a'].into_boxed_slice(), 4, 3, NO_HASHING, false);
+        // expect panic; min > max
+        let res = crack(cp);
+        assert!(
+            !res.is_success(),
+            "should not find result, because of min length!"
+        );
+    }
 
     #[test]
     fn test_crack_identity() {

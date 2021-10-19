@@ -109,7 +109,10 @@ impl Builder {
         if self.chars.is_empty() {
             panic!("Alphabet is empty!")
         }
-        self.chars.into_iter().collect::<Vec<_>>().into_boxed_slice()
+        self.chars
+            .into_iter()
+            .collect::<Vec<_>>()
+            .into_boxed_slice()
     }
 
     pub fn is_empty(&self) -> bool {

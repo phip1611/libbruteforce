@@ -44,7 +44,7 @@ pub fn combinations_count(alphabet: &[char], max_length: u32, min_length: u32) -
         panic!("max_length must be >= min_length")
     }
     let mut sum = 0;
-    for i in min_length..(max_length + 1) {
+    for i in min_length..=max_length {
         sum += alphabet.len().pow(i);
     }
     sum
@@ -67,9 +67,24 @@ mod tests {
             "1 symbol and a maximum length of 3"
         );
         assert_eq!(
+            combinations_count(&alphabet1, 3, 3),
+            1,
+            "1 symbol, min=2, max=3 => 2 combination"
+        );
+        assert_eq!(
+            combinations_count(&alphabet1, 3, 3),
+            1,
+            "1 symbol, min=3, max=3 => 1 combination"
+        );
+        assert_eq!(
             combinations_count(&alphabet2, 1, 0),
             4,
             "3 symbols and a maximum length of 1"
+        );
+        assert_eq!(
+            combinations_count(&alphabet2, 2, 1),
+            12,
+            "3 symbols, min=1, max=2 => 9 combination"
         );
         assert_eq!(
             combinations_count(&alphabet3, 3, 0),

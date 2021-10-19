@@ -69,9 +69,12 @@ pub struct InternalCrackParameter<T: CrackTarget> {
     pub thread_count: usize,
     /// total combinations (given by alphabet and length)
     pub combinations_total: usize,
-    /// max possible combinations per thread (```combinations_total / thread_count```).
-    /// if ```combinations_total % thread_count != 0``` then this value will
-    /// be rounded down. This number is only reached in worst case.
+    /// Max possible combinations per thread (```combinations_total / thread_count```).
+    /// If ```combinations_total % thread_count != 0``` then this value will
+    /// be rounded down. This is only for informational use, the internal algorithm will
+    /// still consider all possible combinations.
+    ///
+    /// A thread reaches this number only in worst case.
     pub combinations_p_t: usize,
 }
 
@@ -80,8 +83,17 @@ impl<T: CrackTarget> From<CrackParameter<T>> for InternalCrackParameter<T> {
     /// what the user/programmer has given the lib through the public api.
     fn from(cp: CrackParameter<T>) -> Self {
         let combinations_total = combinations_count(&cp.alphabet, cp.max_length, cp.min_length);
-        let thread_count = get_thread_count(cp.fair_mode);
+
+        let mut thread_count = get_thread_count(cp.fair_mode);
+        if thread_count > combinations_total {
+            // this only scales because I have the assumption, that there will never be thousands
+            // of CPU threads/cores.
+            log::trace!("there are so few combinations to check, that only one thread is used");
+            thread_count = 1;
+        }
+
         let combinations_p_t = combinations_total / thread_count;
+
         Self {
             crack_param: cp,
             thread_count,
