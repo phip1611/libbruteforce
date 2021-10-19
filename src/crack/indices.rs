@@ -13,8 +13,8 @@
 /// iteration trying to crack the password.
 ///
 /// Example: If our alphabet is Σ={a,b,c}, our maximum password
-/// length is 5 and our current attempt is [,,a,c,b] then the
-/// indices will be [-1,-1,0,2,1]. Values will never ever
+/// length is 5 and our current attempt is `,,a,c,b` then the
+/// indices will be `-1,-1,0,2,1`. Values will never ever
 /// go back to "-1" once been at 0 because we can't have empty
 /// slots inside a word (they shall be marked with a space in
 /// the alphabet).
