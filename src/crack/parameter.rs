@@ -3,12 +3,14 @@
 
 use crate::symbols::combinations_count;
 use crate::transform_fns::TransformFn;
+use crate::CrackTarget;
+use std::fmt::{Debug, Formatter};
 
 /// Describes the necessary parameters for the `crack`-function. This is part of
 /// the public API.
-pub struct CrackParameter {
+pub struct CrackParameter<T: CrackTarget> {
     /// hash to crack
-    pub target: String,
+    pub target: T,
     /// all symbols (letters, digits, ...)
     pub alphabet: Box<[char]>,
     /// maximum crack length (to limit possible combinations)
@@ -16,21 +18,21 @@ pub struct CrackParameter {
     /// minimum crack length (to limit possible combinations)
     pub min_length: u32,
     /// hashing function
-    pub transform_fn: TransformFn,
+    pub transform_fn: TransformFn<T>,
     /// use n-1 threads to save system resources
     pub fair_mode: bool,
 }
 
-impl CrackParameter {
+impl<T: CrackTarget> CrackParameter<T> {
     pub fn new(
-        target: String,
+        target: T,
         alphabet: Box<[char]>,
         max_length: u32,
         min_length: u32,
-        transform_fn: TransformFn,
+        transform_fn: TransformFn<T>,
         fair_mode: bool,
-    ) -> CrackParameter {
-        CrackParameter {
+    ) -> Self {
+        Self {
             target,
             alphabet,
             max_length,
@@ -41,42 +43,56 @@ impl CrackParameter {
     }
 }
 
-/// Describes the necessary parameters for internal use inside the `crack`-function.
-/// This struct will be build from ```CrackParameter```.
-pub struct InternalCrackParameter {
-    /// hash to crack
-    pub target: String,
-    /// all symbols (letters, digits, ...)
-    pub alphabet: Box<[char]>,
-    /// maximum crack length (to limit possible combinations)
-    pub max_length: u32,
-    /// minimum crack length (to limit possible combinations)
-    pub min_length: u32,
-    /// hashing function
-    pub transform_fn: TransformFn,
+impl<T: CrackTarget> Debug for CrackParameter<T> {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("CrackParameter")
+            .field("target", &self.target)
+            .field("alphabet", &self.alphabet)
+            .field("max_length", &self.max_length)
+            .field("min_length", &self.min_length)
+            .field("fair_mode", &self.fair_mode)
+            .field("transform_fn", &"<code>")
+            .finish()
+    }
+}
+
+/// Internal wrapper around [`CrackParameter`], that holds important information for
+/// the cracking process.
+#[derive(Debug)]
+pub struct InternalCrackParameter<T: CrackTarget> {
+    /// See [`CrackParameter`].
+    pub crack_param: CrackParameter<T>,
     /// thread count
     pub thread_count: usize,
     /// total combinations (given by alphabet and length)
     pub combinations_total: usize,
-    /// max possible combinations per thread (```combinations_total / thread_count```).
-    /// if ```combinations_total % thread_count != 0``` then this value will
-    /// be rounded down. This number is only reached in worst case.
+    /// Max possible combinations per thread (```combinations_total / thread_count```).
+    /// If ```combinations_total % thread_count != 0``` then this value will
+    /// be rounded down. This is only for informational use, the internal algorithm will
+    /// still consider all possible combinations.
+    ///
+    /// A thread reaches this number only in worst case.
     pub combinations_p_t: usize,
 }
 
-impl From<CrackParameter> for InternalCrackParameter {
+impl<T: CrackTarget> From<CrackParameter<T>> for InternalCrackParameter<T> {
     /// Creates the object used internally for the cracking process from
     /// what the user/programmer has given the lib through the public api.
-    fn from(cp: CrackParameter) -> Self {
+    fn from(cp: CrackParameter<T>) -> Self {
         let combinations_total = combinations_count(&cp.alphabet, cp.max_length, cp.min_length);
-        let thread_count = get_thread_count(cp.fair_mode);
+
+        let mut thread_count = get_thread_count(cp.fair_mode);
+        if thread_count > combinations_total {
+            // this only scales because I have the assumption, that there will never be thousands
+            // of CPU threads/cores.
+            log::trace!("there are so few combinations to check, that only one thread is used");
+            thread_count = 1;
+        }
+
         let combinations_p_t = combinations_total / thread_count;
-        InternalCrackParameter {
-            target: cp.target,
-            alphabet: cp.alphabet,
-            max_length: cp.max_length,
-            min_length: cp.min_length,
-            transform_fn: cp.transform_fn,
+
+        Self {
+            crack_param: cp,
             thread_count,
             combinations_total,
             combinations_p_t,

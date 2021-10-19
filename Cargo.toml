@@ -1,6 +1,6 @@
 [package]
 name = "libbruteforce"
-version = "2.2.2"
+version = "3.0.0"
 authors = ["Philipp Schuster <phip1611@gmail.com>"]
 edition = "2018"
 license = "MIT"
@@ -16,12 +16,25 @@ documentation = "https://docs.rs/libbruteforce/"
 readme = "README.md"
 keywords = ["bruteforce", "hashes", "passwords"]
 categories = ["algorithms"]
+exclude = [
+    ".github",
+]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-num_cpus = "1.13.0"
-md5 = "0.7.0"
-sha1 = "0.6.0"
-sha2 = "0.8.2"
-log = "0.4.11"
+num_cpus = "1.13"
+md-5 = "0.9"
+sha-1 = "0.9"
+sha2 = "0.9"
+log = "0.4"
+hex = "0.4"
+
+# for examples
+[dev-dependencies]
+simple_logger = "1.11"
+
+[profile.dev]
+# With this, examples and tests run faster by a lot by default.
+# this comes with the downside, that the debugger doesn't really work anymore.
+opt-level = 1

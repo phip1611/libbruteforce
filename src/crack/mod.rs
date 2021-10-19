@@ -2,6 +2,7 @@ use std::sync::atomic::AtomicBool;
 use std::sync::Arc;
 use std::time::Instant;
 
+use crate::CrackTarget;
 use parameter::CrackParameter;
 use parameter::InternalCrackParameter;
 use result::CrackResult;
@@ -22,7 +23,10 @@ mod worker_threads;
 ///
 /// This library is really "dumb". It checks each possible value and doesn't use any probabilities
 /// for more or less probable passwords.
-pub fn crack(cp: CrackParameter) -> CrackResult {
+///
+/// # Parameters
+/// * `cp` - see [`CrackParameter`]
+pub fn crack<T: CrackTarget>(cp: CrackParameter<T>) -> CrackResult<T> {
     let cp = InternalCrackParameter::from(cp);
     let cp = Arc::from(cp);
 
@@ -37,8 +41,7 @@ pub fn crack(cp: CrackParameter) -> CrackResult {
     let solution = handles
         .into_iter()
         .map(|h| h.join().unwrap()) // result of the Option<String> from the threads
-        .filter(|h| h.is_some()) // filter the result
-        .map(|o| o.unwrap()) // map to the actual value
+        .flatten()
         .last(); // extract from the collection
 
     let seconds = instant.elapsed().as_millis() as f64 / 1000_f64;
@@ -53,9 +56,32 @@ pub fn crack(cp: CrackParameter) -> CrackResult {
 
 #[cfg(test)]
 mod tests {
+    use crate::transform_fns::NO_HASHING;
     use crate::util;
 
     use super::*;
+
+    #[test]
+    #[should_panic]
+    fn test_crack_should_panic_1() {
+        let input = String::from("a+c");
+        let cp = CrackParameter::new(input, vec!['a'].into_boxed_slice(), 4, 5, NO_HASHING, false);
+        // expect panic; min > max
+        let _res = crack(cp);
+    }
+
+    #[test]
+
+    fn test_crack_dont_find_bc_of_min_length() {
+        let input = String::from("a+c");
+        let cp = CrackParameter::new(input, vec!['a'].into_boxed_slice(), 4, 3, NO_HASHING, false);
+        // expect panic; min > max
+        let res = crack(cp);
+        assert!(
+            !res.is_success(),
+            "should not find result, because of min length!"
+        );
+    }
 
     #[test]
     fn test_crack_identity() {
@@ -65,7 +91,7 @@ mod tests {
         let res = crack(cp);
         assert!(res.is_success(), "a solution must be found!");
         assert!(
-            target.eq(res.solution.as_ref().unwrap()),
+            input.eq(res.solution.as_ref().unwrap()),
             "target and cracked result must equal!"
         );
     }

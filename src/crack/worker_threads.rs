@@ -9,26 +9,37 @@ use std::thread::JoinHandle;
 
 use crate::crack::indices::{indices_create, indices_increment_by, indices_to_string};
 use crate::crack::parameter::InternalCrackParameter;
+use crate::CrackTarget;
 
 /// Spawns all worker threads.
-pub fn spawn_worker_threads(
-    cp: Arc<InternalCrackParameter>,
+pub fn spawn_worker_threads<T: CrackTarget>(
+    params: Arc<InternalCrackParameter<T>>,
     done: Arc<AtomicBool>,
 ) -> Vec<JoinHandle<Option<String>>> {
     let mut handles = vec![];
     // spawn thread for each cpu
-    for tid in 0..cp.thread_count {
-        let mut indices = indices_create(cp.max_length, cp.min_length);
-        // prepare array for thread with right starting index
-        indices_increment_by(&cp.alphabet, &mut indices, tid).expect("Increment failed");
-        handles.push(spawn_worker_thread(cp.clone(), done.clone(), indices, tid));
+    for tid in 0..params.thread_count {
+        // indices object, that each thread gets as starting point
+        let mut indices =
+            indices_create(params.crack_param.max_length, params.crack_param.min_length);
+
+        // alternate indices object for the next thread
+        indices_increment_by(&params.crack_param.alphabet, &mut indices, tid)
+            .expect("Increment failed");
+
+        handles.push(spawn_worker_thread(
+            params.clone(),
+            done.clone(),
+            indices,
+            tid,
+        ));
     }
     handles
 }
 
 /// Spawns a worker thread with its work loop.
-fn spawn_worker_thread(
-    cp: Arc<InternalCrackParameter>,
+fn spawn_worker_thread<T: CrackTarget>(
+    params: Arc<InternalCrackParameter<T>>,
     done: Arc<AtomicBool>,
     indices: Box<[isize]>,
     tid: usize,
@@ -54,54 +65,64 @@ fn spawn_worker_thread(
 
         // infinite incrementing; break inside loop if its the right time for
         loop {
-            if interrupt_count == 0 {
-                interrupt_count = INTERRUPT_COUNT_THRESHOLD;
-                if done.load(Ordering::Relaxed) {
-                    trace!("Thread {:>2} stops at {:>6.2}% progress because another thread found a solution", tid, get_percent(&cp, iteration_count));
-                    break;
-                } else {
-                    trace!(
-                        "Thread {:>2} is at {:>6.2}% progress",
-                        tid,
-                        get_percent(&cp, iteration_count)
-                    );
+            {
+                if interrupt_count == 0 {
+                    interrupt_count = INTERRUPT_COUNT_THRESHOLD;
+                    if done.load(Ordering::Relaxed) {
+                        trace!("Thread {:>2} stops at {:>6.2}% progress because another thread found a solution", tid, get_percent(&params, iteration_count));
+                        break;
+                    } else {
+                        trace!(
+                            "Thread {:>2} is at {:>6.2}% progress",
+                            tid,
+                            get_percent(&params, iteration_count)
+                        );
+                    }
                 }
-            }
-            interrupt_count -= 1;
-
-            let res = indices_increment_by(&cp.alphabet, &mut indices, cp.thread_count);
-            if res.is_err() {
-                info!(
-                    "Thread {:>2} checked all possible values without finding a solution. Done.",
-                    tid
-                );
-                break;
+                interrupt_count -= 1;
             }
 
-            iteration_count += 1;
-
-            let string = indices_to_string(&cp.alphabet, &indices);
-            // transform; e.g. hashing
-            // extra parentheses to prevent "field, not a method" error
-            let transformed_string = (cp.transform_fn)(&string);
-            if transformed_string.eq(&cp.target) {
-                info!(
-                    "Thread {:>2} found a solution at a progress of {:>6.2}%!",
-                    tid,
-                    get_percent(&cp, iteration_count)
+            {
+                let res = indices_increment_by(
+                    &params.crack_param.alphabet,
+                    &mut indices,
+                    params.thread_count,
                 );
-                // let other threads know we are done
-                done.store(true, Ordering::Relaxed);
-                result = Some(string);
-                break;
+                if res.is_err() {
+                    info!(
+                        "Thread {:>2} checked all possible values without finding a solution. Done.",
+                        tid
+                    );
+                    break;
+                }
+
+                iteration_count += 1;
+
+                // build string
+                let string = indices_to_string(&params.crack_param.alphabet, &indices);
+
+                // transform; e.g. hashing
+                // extra parentheses to prevent "field, not a method" error
+                let transformed_string = (params.crack_param.transform_fn)(&string);
+                if transformed_string.eq(&params.crack_param.target) {
+                    info!(
+                        "Thread {:>2} found a solution at a progress of {:>6.2}%!",
+                        tid,
+                        get_percent(&params, iteration_count)
+                    );
+                    // let other threads know we are done
+                    done.store(true, Ordering::Relaxed);
+                    result = Some(string);
+                    break;
+                }
             }
         }
         result
     })
 }
 
-fn get_percent(cp: &Arc<InternalCrackParameter>, iteration_count: usize) -> f64 {
+fn get_percent<T: CrackTarget>(cp: &Arc<InternalCrackParameter<T>>, iteration_count: usize) -> f64 {
     let total = cp.combinations_p_t as f64;
     let current = iteration_count as f64;
-    current / total * 100_f64
+    current / total * 100.0
 }

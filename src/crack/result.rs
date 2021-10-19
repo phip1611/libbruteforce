@@ -1,11 +1,13 @@
 //! Describes the result of the cracking process.
 
 use crate::crack::parameter::InternalCrackParameter;
+use crate::CrackTarget;
 
 /// Describes the result of a finished cracking process.
-pub struct CrackResult {
+#[derive(Debug)]
+pub struct CrackResult<T: CrackTarget> {
     /// the target string
-    pub target: String,
+    pub target: T,
     /// The solution to the target string
     pub solution: Option<String>,
     pub thread_count: usize,
@@ -19,14 +21,14 @@ pub struct CrackResult {
     pub seconds_as_fraction: f64,
 }
 
-impl CrackResult {
+impl<T: CrackTarget> CrackResult<T> {
     fn new(
-        cp: InternalCrackParameter,
+        cp: InternalCrackParameter<T>,
         seconds_as_fraction: f64,
         solution: Option<String>,
-    ) -> CrackResult {
-        CrackResult {
-            target: cp.target,
+    ) -> Self {
+        Self {
+            target: cp.crack_param.target,
             solution,
             thread_count: cp.thread_count,
             combinations_total: cp.combinations_total,
@@ -35,16 +37,16 @@ impl CrackResult {
         }
     }
 
-    pub fn failure(cp: InternalCrackParameter, seconds_as_fraction: f64) -> CrackResult {
-        CrackResult::new(cp, seconds_as_fraction, None)
+    pub fn failure(cp: InternalCrackParameter<T>, seconds_as_fraction: f64) -> Self {
+        Self::new(cp, seconds_as_fraction, None)
     }
 
     pub fn success(
-        cp: InternalCrackParameter,
+        cp: InternalCrackParameter<T>,
         seconds_as_fraction: f64,
         solution: String,
-    ) -> CrackResult {
-        CrackResult::new(cp, seconds_as_fraction, Some(solution))
+    ) -> Self {
+        Self::new(cp, seconds_as_fraction, Some(solution))
     }
 
     pub fn is_failure(&self) -> bool {
