@@ -1,4 +1,8 @@
-use md5::{digest::generic_array::GenericArray, Digest, Md5};
+use md5::{
+    digest::generic_array::GenericArray,
+    Digest,
+    Md5,
+};
 
 use crate::transform_fns::TransformFn;
 

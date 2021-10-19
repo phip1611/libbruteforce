@@ -1,20 +1,26 @@
-# libbruteforce - A Rust library to brute force hashes multithreaded
+# libbruteforce - A Rust library to brute force hashes with multiple threads
 
 This library spawns a thread for each cpu on your system to
 brute force a password/hash. It offers built-in support for MD5, SHA1,
 and SHA256, but you can also provide your own hashing function as a
 parameter.
 
-You can specify your own alphabet or use the internally programmed
-symbols.
+You can specify your own alphabet to limit search space or use the
+internally hard-coded symbols (the most common chars).
 
 #### JUST FOR FUN!
 I did this project just for fun to learn new things. Please don't
 use it to do any harm to someones privacy!
 
+#### MSRV
+1.52.1
+
+#### Works On
+Linux, MacOS, Windows (targets with `std` library)
+
 #### Hint
-Always execute this library in release mode, e.g. `cargo run --bin bench --release`. Otherwise the 
-performance is really bad.
+Always execute this library in release mode, e.g. `cargo run --bin bench --release`. Otherwise,
+the performance is really poor.
 
 #### Example usage
 ```rust
@@ -42,5 +48,6 @@ fn main() {
 }
 ```
 
-README on github: https://github.com/phip1611/bruteforcer
-Documentation on docs.rs: https://docs.rs/libbruteforce/
+
+README on github: <https://github.com/phip1611/bruteforcer>
+Documentation on docs.rs: <https://docs.rs/libbruteforce/>

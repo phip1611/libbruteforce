@@ -1,7 +1,12 @@
-use std::collections::HashSet;
+use std::collections::BTreeSet;
 
 use crate::symbols::{
-    ALL_OTHER_SPECIAL_CHARS, COMMON_SPECIAL_CHARS, DIGITS, LC_LETTERS, LC_UMLAUTS, UC_LETTERS,
+    ALL_OTHER_SPECIAL_CHARS,
+    COMMON_SPECIAL_CHARS,
+    DIGITS,
+    LC_LETTERS,
+    LC_UMLAUTS,
+    UC_LETTERS,
     UC_UMLAUTS,
 };
 
@@ -11,15 +16,17 @@ use crate::symbols::{
 ///
 /// This builder is optional and not required to build
 /// a alphabet for the lib.
-#[derive(Default)]
+#[derive(Default, Debug)]
 pub struct Builder {
-    chars: HashSet<char>,
+    // btree set => reproducible runs, because order of symbols is the same.
+    // doesn't effect the runtime performance
+    chars: BTreeSet<char>,
 }
 
 impl Builder {
     /// Creates a new empty builder instance.
     pub fn new() -> Self {
-        Builder::default()
+        Self::default()
     }
 
     /// Shorthand for all possible symbols.
@@ -35,7 +42,7 @@ impl Builder {
 
     /// Digits 0 to 9
     pub fn with_digits(mut self) -> Self {
-        self.chars.extend(DIGITS);
+        self.chars.extend(&DIGITS);
         self
     }
 
@@ -102,8 +109,7 @@ impl Builder {
         if self.chars.is_empty() {
             panic!("Alphabet is empty!")
         }
-        let v: Vec<_> = self.chars.into_iter().collect();
-        v.into_boxed_slice()
+        self.chars.into_iter().collect::<Vec<_>>().into_boxed_slice()
     }
 
     pub fn is_empty(&self) -> bool {
@@ -115,7 +121,12 @@ impl Builder {
 mod tests {
     use crate::symbols::builder::Builder;
     use crate::symbols::{
-        ALL_OTHER_SPECIAL_CHARS, COMMON_SPECIAL_CHARS, DIGITS, LC_LETTERS, LC_UMLAUTS, UC_LETTERS,
+        ALL_OTHER_SPECIAL_CHARS,
+        COMMON_SPECIAL_CHARS,
+        DIGITS,
+        LC_LETTERS,
+        LC_UMLAUTS,
+        UC_LETTERS,
         UC_UMLAUTS,
     };
 

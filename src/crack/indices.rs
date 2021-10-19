@@ -35,32 +35,15 @@ pub fn indices_create(max_length: u32, min_length: u32) -> Box<[isize]> {
 /// Empty slots will be skipped.
 #[inline] // small but notable performance gain
 pub fn indices_to_string(alphabet: &[char], indices: &[isize]) -> String {
-    let mut word = String::new();
+    let mut word = String::with_capacity(indices.len());
     for index in indices {
+        // skip empty fields. -1 means nothing, not " "
         if *index != -1 {
-            // otherwise our string isn't so far that long
             let symbol = alphabet[*index as usize];
             word.push(symbol);
         }
     }
     word
-}
-
-/// Calculates how many fields are not "-1" aka how long the word that is represented is.
-#[allow(dead_code)]
-#[inline]
-pub fn indices_word_length(indices: &[isize]) -> usize {
-    let mut n = 0;
-    let mut i = (indices.len() - 1) as isize;
-    while i >= 0 {
-        if indices[i as usize] != -1 {
-            n += 1;
-            i -= 1;
-        } else {
-            break;
-        }
-    }
-    n
 }
 
 /// Increments the indices array by a given number.
@@ -229,17 +212,5 @@ mod tests {
         for i in 0..len {
             assert_eq!(indices[i as usize], (alphabet.len() - 1) as isize)
         }
-    }
-
-    #[test]
-    fn test_length_of_indices_array() {
-        let alphabet: Box<[char]> = Box::from(['a']);
-        let length = 5;
-        let mut indices = indices_create(length, 0);
-        assert_eq!(0, indices_word_length(&indices));
-        indices_increment_by(&alphabet, &mut indices, 1).unwrap();
-        assert_eq!(1, indices_word_length(&indices));
-        indices_increment_by(&alphabet, &mut indices, 4).unwrap();
-        assert_eq!(length as usize, indices_word_length(&indices));
     }
 }

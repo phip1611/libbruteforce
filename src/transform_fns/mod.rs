@@ -1,14 +1,8 @@
 // reexport
-pub use crate::transform_fns::identity::NO_HASHING;
-pub use crate::transform_fns::md5::str_to_md5_hash;
-pub use crate::transform_fns::md5::Md5Hash;
-pub use crate::transform_fns::md5::MD5_HASHING;
-pub use crate::transform_fns::sha1::str_to_sha1_hash;
-pub use crate::transform_fns::sha1::Sha1Hash;
-pub use crate::transform_fns::sha1::SHA1_HASHING;
-pub use crate::transform_fns::sha256::str_to_sha256_hash;
-pub use crate::transform_fns::sha256::Sha256Hash;
-pub use crate::transform_fns::sha256::SHA256_HASHING;
+pub use crate::transform_fns::identity::*;
+pub use crate::transform_fns::md5::*;
+pub use crate::transform_fns::sha1::*;
+pub use crate::transform_fns::sha256::*;
 
 mod identity;
 mod md5;
@@ -26,7 +20,11 @@ mod tests {
     use crate::transform_fns::md5::MD5_HASHING;
     use crate::transform_fns::sha1::SHA1_HASHING;
     use crate::transform_fns::sha256::SHA256_HASHING;
-    use crate::transform_fns::{str_to_md5_hash, str_to_sha1_hash, str_to_sha256_hash};
+    use crate::transform_fns::{
+        str_to_md5_hash,
+        str_to_sha1_hash,
+        str_to_sha256_hash,
+    };
 
     #[test]
     fn test_identity() {

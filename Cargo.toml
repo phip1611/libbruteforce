@@ -16,14 +16,25 @@ documentation = "https://docs.rs/libbruteforce/"
 readme = "README.md"
 keywords = ["bruteforce", "hashes", "passwords"]
 categories = ["algorithms"]
-include = ["src/**/*", "LICENSE", "README.md"]
+exclude = [
+    ".github",
+]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-num_cpus = "1.13.0"
-md-5 = "0.9.1"
-sha-1 = "0.9.8"
-sha2 = "0.9.8"
-log = "0.4.11"
+num_cpus = "1.13"
+md-5 = "0.9"
+sha-1 = "0.9"
+sha2 = "0.9"
+log = "0.4"
 hex = "0.4"
+
+# for examples
+[dev-dependencies]
+simple_logger = "1.11"
+
+[profile.dev]
+# With this, examples and tests run faster by a lot by default.
+# this comes with the downside, that the debugger doesn't really work anymore.
+opt-level = 1

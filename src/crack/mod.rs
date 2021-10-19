@@ -2,6 +2,7 @@ use std::sync::atomic::AtomicBool;
 use std::sync::Arc;
 use std::time::Instant;
 
+use crate::CrackTarget;
 use parameter::CrackParameter;
 use parameter::InternalCrackParameter;
 use result::CrackResult;
@@ -22,7 +23,10 @@ mod worker_threads;
 ///
 /// This library is really "dumb". It checks each possible value and doesn't use any probabilities
 /// for more or less probable passwords.
-pub fn crack<T: 'static + Eq + Send + Sync>(cp: CrackParameter<T>) -> CrackResult<T> {
+///
+/// # Parameters
+/// * `cp` - see [`CrackParameter`]
+pub fn crack<T: CrackTarget>(cp: CrackParameter<T>) -> CrackResult<T> {
     let cp = InternalCrackParameter::from(cp);
     let cp = Arc::from(cp);
 
