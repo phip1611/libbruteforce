@@ -16,12 +16,14 @@ documentation = "https://docs.rs/libbruteforce/"
 readme = "README.md"
 keywords = ["bruteforce", "hashes", "passwords"]
 categories = ["algorithms"]
+include = ["src/**/*", "LICENSE", "README.md"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
 num_cpus = "1.13.0"
-md5 = "0.7.0"
-sha1 = "0.6.0"
-sha2 = "0.8.2"
+md-5 = "0.9.1"
+sha-1 = "0.9.8"
+sha2 = "0.9.8"
 log = "0.4.11"
+hex = "0.4"

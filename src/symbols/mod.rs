@@ -32,11 +32,10 @@ pub static COMMON_SPECIAL_CHARS: [char; 16] = [
 ];
 
 /// all special chars on a common qwertz keyboard
-pub static ALL_OTHER_SPECIAL_CHARS: [char; 26] = [
-    '_', ':', ';', '<', '>', '|', '\'', '*', '~', '`', '´', '\\', '^', '°', '(', ')', '{', '}',
-    '[', ']', '€', '@', '"', '§', '/', 'µ',
+pub static ALL_OTHER_SPECIAL_CHARS: [char; 23] = [
+    '_', ':', ';', '<', '>', '|', '\'', '*', '~', '`', '´', '\\', '^', '°', '{', '}', '[', ']',
+    '€', '@', '"', '§', 'µ',
 ];
-
 
 /// Calculates the amount of possible permutations if n symbols are given and m slots are available.
 /// This solutions counts in that the value can be zero-length, one-length and so on.

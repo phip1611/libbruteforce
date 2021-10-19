@@ -4,3 +4,4 @@ example/Cargo.lock
 **/*.rs.bk
 .idea
 *.iml
+Cargo.lock
