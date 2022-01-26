@@ -1,11 +1,12 @@
-use sha1::{digest::generic_array::GenericArray, Digest, Sha1};
+use md5::digest::Output;
+use sha1::{Digest, Sha1};
 
 use crate::transform_fns::TransformFn;
 
 /// Sha1-Hashing
 pub static SHA1_HASHING: TransformFn<Sha1Hash> = sha1;
 
-pub type Sha1Hash = GenericArray<u8, <sha1::Sha1 as Digest>::OutputSize>;
+pub type Sha1Hash = Output<Sha1>;
 
 fn sha1(input: &str) -> Sha1Hash {
     let mut m = Sha1::default();

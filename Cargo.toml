@@ -24,17 +24,24 @@ exclude = [
 
 [dependencies]
 num_cpus = "1.13"
-md-5 = "0.9"
-sha-1 = "0.9"
-sha2 = "0.9"
+md-5 = "0.10"
+sha-1 = "0.10"
+sha2 = "0.10"
 log = "0.4"
 hex = "0.4"
 
 # for examples
 [dev-dependencies]
-simple_logger = "1.11"
+simple_logger = "2.1"
 
 [profile.dev]
 # With this, examples and tests run faster by a lot by default.
 # this comes with the downside, that the debugger doesn't really work anymore.
 opt-level = 1
+
+[profile.release]
+# everything for maximum performance
+# https://doc.rust-lang.org/cargo/reference/profiles.html
+# only differences from default settings
+codegen-units = 1
+lto = true
