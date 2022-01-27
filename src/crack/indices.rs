@@ -52,7 +52,7 @@ pub fn indices_to_string(alphabet: &[char], indices: &[isize]) -> String {
 #[inline]
 pub fn indices_increment_by(
     alphabet: &[char],
-    indices: &mut Box<[isize]>,
+    indices: &mut [isize],
     add_value: usize,
 ) -> Result<(), &'static str> {
     if add_value == 0 {
