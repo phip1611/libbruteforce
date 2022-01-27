@@ -60,13 +60,13 @@ fn spawn_worker_thread<T: CrackTarget>(
         // The result that the thread calculated/found
         let mut result = None;
 
-        /// The number after how many iterations the thread looks if another thread
+        /// The amount of iterations after the thread checks if another thread
         /// is already done, so that we can stop further work. We do this only after
         /// a few millions iterations to keep the overhead low. Tests on my machine
         /// (i5-10600K) showed that 2 million iterations take about 1s - this should be okay
         /// because the overhead is not that big. A test already showed that
         /// increasing this has no real impact on the iterations per s.
-        const INTERRUPT_COUNT_THRESHOLD: usize = 1_000_000;
+        const INTERRUPT_COUNT_THRESHOLD: usize = 2_000_000;
         let mut interrupt_count = INTERRUPT_COUNT_THRESHOLD;
 
         // infinite incrementing; break inside loop if its the right time for
@@ -131,8 +131,11 @@ fn spawn_worker_thread<T: CrackTarget>(
     })
 }
 
-fn get_percent<T: CrackTarget>(cp: &Arc<InternalCrackParameter<T>>, iteration_count: usize) -> f64 {
-    let total = cp.combinations_p_t as f64;
-    let current = iteration_count as f64;
+/// Returns the percent of all possible iterations that the current thread has already
+/// executed.
+#[inline]
+fn get_percent<T: CrackTarget>(cp: &InternalCrackParameter<T>, iteration_count: usize) -> f32 {
+    let total = cp.combinations_p_t as f32;
+    let current = iteration_count as f32;
     current / total * 100.0
 }
