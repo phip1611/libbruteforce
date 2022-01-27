@@ -11,7 +11,7 @@ use simple_logger::SimpleLogger;
 
 fn main() {
     // to get information about trace! logs (like progress) on the console
-    SimpleLogger::new().init().unwrap();
+    SimpleLogger::new().with_utc_timestamps().init().unwrap();
 
     // create value we want to hash
     const MAX_LEN: u32 = 4; // everything above 4 with the full alphabet => takes already quite some time
