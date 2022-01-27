@@ -68,7 +68,10 @@ fn main() {
     let m_iterations_ps = iterations_ps / 1_000_000.0;
     let m_iterations_ps_pt = iterations_ps_pt / 1_000_000.0;
     println!("{:>7.3} million iterations / s ", m_iterations_ps);
-    println!("{:>7.3} million iterations / s (per thread)", m_iterations_ps_pt);
+    println!(
+        "{:>7.3} million iterations / s (per thread)",
+        m_iterations_ps_pt
+    );
 }
 
 /// Returns the worst-case search password for the given alphabet.
