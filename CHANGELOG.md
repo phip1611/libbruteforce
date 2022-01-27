@@ -1,3 +1,7 @@
+# v3.0.1 (2022-01-27)
+- massive performance improvements (20-40%)
+- internal code quality improved
+
 # v3.0.0 (2021-10-19)
 
 - started CHANGELOG file
