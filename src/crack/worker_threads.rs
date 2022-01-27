@@ -74,7 +74,7 @@ fn spawn_worker_thread<T: CrackTarget>(
             {
                 if interrupt_count == 0 {
                     interrupt_count = INTERRUPT_COUNT_THRESHOLD;
-                    if done.load(Ordering::Relaxed) {
+                    if done.load(Ordering::SeqCst) {
                         trace!("Thread {:>2} stops at {:>6.2}% progress because another thread found a solution", tid, get_percent(&params, iteration_count));
                         break;
                     } else {
@@ -121,7 +121,7 @@ fn spawn_worker_thread<T: CrackTarget>(
                         get_percent(&params, iteration_count)
                     );
                     // let other threads know we are done
-                    done.store(true, Ordering::Relaxed);
+                    done.store(true, Ordering::SeqCst);
                     result = Some(current_crack_string);
                     break;
                 }
