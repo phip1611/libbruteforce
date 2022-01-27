@@ -10,7 +10,13 @@ internally hard-coded symbols (the most common chars).
 
 #### JUST FOR FUN!
 I did this project just for fun to learn new things. Please don't
-use it to do any harm to someones privacy!
+use it to do any harm to someone's privacy!
+
+#### Maximum Performance
+If you use this in a project: To let the Rust compiler produce a binary with maximum performance,
+follow the steps here:
+- <https://www.reddit.com/r/rust/comments/lyck1u/compiling_for_maximum_performance/>
+- <https://deterministic.space/high-performance-rust.html>
 
 #### MSRV
 1.52.1

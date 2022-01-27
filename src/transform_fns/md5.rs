@@ -1,11 +1,12 @@
-use md5::{digest::generic_array::GenericArray, Digest, Md5};
+use md5::digest::Output;
+use md5::{Digest, Md5};
 
 use crate::transform_fns::TransformFn;
 
 /// MD5-Hashing
-pub static MD5_HASHING: TransformFn<Md5Hash> = md5;
+pub const MD5_HASHING: TransformFn<Md5Hash> = md5;
 
-pub type Md5Hash = GenericArray<u8, <md5::Md5 as Digest>::OutputSize>;
+pub type Md5Hash = Output<Md5>;
 
 fn md5(input: &str) -> Md5Hash {
     let mut m = Md5::new();

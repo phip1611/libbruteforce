@@ -11,7 +11,7 @@ use simple_logger::SimpleLogger;
 
 fn main() {
     // to get information about trace! logs (like progress) on the console
-    SimpleLogger::new().init().unwrap();
+    SimpleLogger::new().with_utc_timestamps().init().unwrap();
 
     // create value we want to hash
     const MAX_LEN: u32 = 4; // everything above 4 with the full alphabet => takes already quite some time
@@ -63,10 +63,15 @@ fn main() {
         "Did {} iterations in {} threads in {}s",
         result.combinations_total, result.thread_count, result.seconds_as_fraction
     );
-    let iterations_p_s = result.combinations_total as f64 / result.seconds_as_fraction;
-    let iterations_ps_pt = iterations_p_s / result.thread_count as f64;
-    println!("{} iterations / s ", iterations_p_s as usize);
-    println!("{} iterations / s (per thread)", iterations_ps_pt as usize);
+    let iterations_ps = result.combinations_total as f64 / result.seconds_as_fraction;
+    let iterations_ps_pt = iterations_ps / result.thread_count as f64;
+    let m_iterations_ps = iterations_ps / 1_000_000.0;
+    let m_iterations_ps_pt = iterations_ps_pt / 1_000_000.0;
+    println!("{:>7.3} million iterations / s ", m_iterations_ps);
+    println!(
+        "{:>7.3} million iterations / s (per thread)",
+        m_iterations_ps_pt
+    );
 }
 
 /// Returns the worst-case search password for the given alphabet.

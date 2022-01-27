@@ -62,9 +62,13 @@ mod util;
 pub mod symbols;
 pub mod transform_fns;
 
-/// Common trait for crack targets. This is the super-type for all hashes one
-/// want to track, i.e. SHA-1 or SHA-256. This can also refer to a plain
-/// string.
+/// Common trait for crack targets (hashes or plain text to crack). This is the super-type
+/// which enables the usage of multiple hashing algorithms. An example that
+/// implements this/fulfils the trait requirements is [`String`].
+// 'static:
+//  - it means the type does not contain any non-static references; i.e. consumes can
+//    own implementers of this type easily
+//  - https://doc.rust-lang.org/rust-by-example/scope/lifetime/static_lifetime.html
 pub trait CrackTarget: 'static + Eq + Send + Sync + Debug {}
 
 // automatically impl the trait for all types that fulfill the condition/required traits

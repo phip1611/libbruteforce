@@ -8,7 +8,7 @@ use simple_logger::SimpleLogger;
 /// Minimal example.
 fn main() {
     // to get information about trace! logs (like progress) on the console
-    SimpleLogger::new().init().unwrap();
+    SimpleLogger::new().with_utc_timestamps().init().unwrap();
 
     let alphabet = symbols::Builder::new()
         .with_lc_letters()
