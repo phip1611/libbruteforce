@@ -76,13 +76,13 @@ impl Builder {
         self
     }
 
-    /// Common special chars on QWERTZ layout, see `COMMON_SPECIAL_CHARS`.
+    /// Common special chars on QWERTZ/Y layout, see `COMMON_SPECIAL_CHARS`.
     pub fn with_common_special_chars(mut self) -> Self {
         self.chars.extend(&COMMON_SPECIAL_CHARS);
         self
     }
 
-    /// Other special chars on QWERTZ layout, see `ALL_OTHER_SPECIAL_CHARS`.
+    /// Other special chars on QWERTZ/Y layout, see `ALL_OTHER_SPECIAL_CHARS`.
     pub fn with_all_other_special_chars(mut self) -> Self {
         self.chars.extend(&ALL_OTHER_SPECIAL_CHARS);
         self
@@ -94,6 +94,7 @@ impl Builder {
             .with_all_other_special_chars()
     }
 
+    /// Adds a single char to the alphabet.
     pub fn with_char(mut self, c: char) -> Self {
         self.chars.insert(c);
         self

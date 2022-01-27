@@ -4,7 +4,7 @@ use sha2::{Digest, Sha256};
 use crate::transform_fns::TransformFn;
 
 /// SHA256-Hashing
-pub static SHA256_HASHING: TransformFn<Sha256Hash> = sha256;
+pub const SHA256_HASHING: TransformFn<Sha256Hash> = sha256;
 
 pub type Sha256Hash = Output<Sha256>;
 

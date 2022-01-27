@@ -1,5 +1,5 @@
 //! All functions related for the multithreaded cracking process.
-//! The actual cracking happens here.
+//! The actual cracking happens here in the closure in [`spawn_worker_thread`].
 
 use log::{info, trace};
 use std::sync::atomic::{AtomicBool, Ordering};
@@ -41,14 +41,11 @@ pub fn spawn_worker_threads<T: CrackTarget>(
 fn spawn_worker_thread<T: CrackTarget>(
     params: Arc<InternalCrackParameter<T>>,
     done: Arc<AtomicBool>,
-    indices: Box<[isize]>,
+    mut indices: Box<[isize]>,
     tid: usize,
 ) -> JoinHandle<Option<String>> {
-    // mark var as mutable for compiler
-    let mut indices = indices;
-
     // Counter for total iterations/total checked values
-    let mut iteration_count = 0_usize;
+    let mut iteration_count = 0;
 
     thread::spawn(move || {
         // reserve a string buffer with the maximum needed size; in the worst case it can contain
@@ -71,6 +68,7 @@ fn spawn_worker_thread<T: CrackTarget>(
 
         // infinite incrementing; break inside loop if its the right time for
         loop {
+            // tell about progress + stop if another thread found a solution
             {
                 if interrupt_count == 0 {
                     interrupt_count = INTERRUPT_COUNT_THRESHOLD;
@@ -88,6 +86,7 @@ fn spawn_worker_thread<T: CrackTarget>(
                 interrupt_count -= 1;
             }
 
+            // the actual cracking
             {
                 let res = indices_increment_by(
                     &params.crack_param.alphabet,
@@ -113,8 +112,8 @@ fn spawn_worker_thread<T: CrackTarget>(
 
                 // transform; e.g. hashing
                 // extra parentheses to prevent "field, not a method" error
-                let transformed_string = (params.crack_param.transform_fn)(&current_crack_string);
-                if transformed_string.eq(&params.crack_param.target) {
+                let hash_output = (params.crack_param.transform_fn)(&current_crack_string);
+                if hash_output == params.crack_param.target {
                     info!(
                         "Thread {:>2} found a solution at a progress of {:>6.2}%!",
                         tid,
@@ -134,7 +133,7 @@ fn spawn_worker_thread<T: CrackTarget>(
 /// Returns the percent of all possible iterations that the current thread has already
 /// executed.
 #[inline]
-fn get_percent<T: CrackTarget>(cp: &InternalCrackParameter<T>, iteration_count: usize) -> f32 {
+fn get_percent<T: CrackTarget>(cp: &InternalCrackParameter<T>, iteration_count: u64) -> f32 {
     let total = cp.combinations_p_t as f32;
     let current = iteration_count as f32;
     current / total * 100.0

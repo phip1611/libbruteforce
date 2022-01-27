@@ -37,13 +37,12 @@ pub fn indices_create(max_length: u32, min_length: u32) -> Box<[isize]> {
 pub fn indices_to_string(buf: &mut String, alphabet: &[char], indices: &[isize]) {
     // clear keeps the capacity
     buf.clear();
-    for index in indices {
-        // skip empty fields. -1 means nothing, not " "
-        if *index != -1 {
-            let symbol = alphabet[*index as usize];
-            buf.push(symbol);
-        }
-    }
+    indices
+        .iter()
+        // skip empty fields. -1 means nothing (the empty word ""), not " "
+        .filter(|index| **index != -1)
+        .map(|index| alphabet[*index as usize])
+        .for_each(|char| buf.push(char))
 }
 
 /// Increments the indices array by a given number.
@@ -63,28 +62,29 @@ pub fn indices_increment_by(
     // The carry from the last iteration; in the first iteration the carry
     // is the add_value; in each further iteration its the actual carry
     let mut carry = add_value;
-    for i in 0..indices.len() {
-        // we go from left to right
-        let position = indices.len() - 1 - i;
+
+    // we go from left to right => reverse
+    for index in (0..indices.len()).rev() {
         if carry == 0 {
             // done, no more carry to bring to the next position
             break;
         }
 
         // the current index at this position in the indices array
-        let current_value = indices[position];
+        let current_value = indices[index];
+        // new value; possibly overflowed its range
         let mut new_value = current_value + carry as isize;
 
         // out of bounds? modulo!
         if new_value >= alphabet.len() as isize {
             // carry for next position/next iteration
             carry = new_value as usize / alphabet.len();
-            new_value %= (alphabet.len()) as isize;
+            new_value %= alphabet.len() as isize;
         } else {
             carry = 0;
         }
 
-        indices[position] = new_value;
+        indices[index] = new_value;
     }
 
     if carry == 0 {

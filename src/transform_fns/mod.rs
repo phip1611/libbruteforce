@@ -10,9 +10,9 @@ mod sha1;
 mod sha256;
 
 /// This type describes functions used to transform the current guess during the bruteforce run
-/// before it is compared to the target value. This can be a hashing algorithm for example.
+/// before it is compared to the target value. This can be a hashing algorithm, such as
+/// identity, md5, or sha256. `T` is of type [`crate::CrackTarget`].
 pub type TransformFn<T> = fn(&str) -> T;
-// pub type TransformFn<T> = dyn Fn(&str) -> T;
 
 #[cfg(test)]
 mod tests {
