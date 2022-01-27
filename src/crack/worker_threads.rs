@@ -51,6 +51,12 @@ fn spawn_worker_thread<T: CrackTarget>(
     let mut iteration_count = 0_usize;
 
     thread::spawn(move || {
+        // reserve a string buffer with the maximum needed size; in the worst case it can contain
+        // indices.len() * 4 bytes, because UTF-8 chars can be at most 4 byte long. Because
+        // I prevent the allocation for a string in every iteration and do this only once,
+        // I cauld improve the performance even further.
+        let mut current_crack_string = String::with_capacity(indices.len() * 4);
+
         // The result that the thread calculated/found
         let mut result = None;
 
@@ -99,11 +105,15 @@ fn spawn_worker_thread<T: CrackTarget>(
                 iteration_count += 1;
 
                 // build string
-                let string = indices_to_string(&params.crack_param.alphabet, &indices);
+                indices_to_string(
+                    &mut current_crack_string,
+                    &params.crack_param.alphabet,
+                    &indices,
+                );
 
                 // transform; e.g. hashing
                 // extra parentheses to prevent "field, not a method" error
-                let transformed_string = (params.crack_param.transform_fn)(&string);
+                let transformed_string = (params.crack_param.transform_fn)(&current_crack_string);
                 if transformed_string.eq(&params.crack_param.target) {
                     info!(
                         "Thread {:>2} found a solution at a progress of {:>6.2}%!",
@@ -112,7 +122,7 @@ fn spawn_worker_thread<T: CrackTarget>(
                     );
                     // let other threads know we are done
                     done.store(true, Ordering::Relaxed);
-                    result = Some(string);
+                    result = Some(current_crack_string);
                     break;
                 }
             }

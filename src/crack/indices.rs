@@ -32,18 +32,18 @@ pub fn indices_create(max_length: u32, min_length: u32) -> Box<[isize]> {
 }
 
 /// Transforms the indices array into a string using the alphabet.
-/// Empty slots will be skipped.
+/// Empty slots will be skipped. They contain the empty word.
 #[inline] // small but notable performance gain
-pub fn indices_to_string(alphabet: &[char], indices: &[isize]) -> String {
-    let mut word = String::with_capacity(indices.len());
+pub fn indices_to_string(buf: &mut String, alphabet: &[char], indices: &[isize]) {
+    // clear keeps the capacity
+    buf.clear();
     for index in indices {
         // skip empty fields. -1 means nothing, not " "
         if *index != -1 {
             let symbol = alphabet[*index as usize];
-            word.push(symbol);
+            buf.push(symbol);
         }
     }
-    word
 }
 
 /// Increments the indices array by a given number.
@@ -135,8 +135,9 @@ mod tests {
         arr[2] = 1;
         arr[3] = 2;
         arr[4] = 0;
-        let str = indices_to_string(&alphabet, &arr);
-        assert_eq!(str, "bca", "Strings should equal")
+        let mut str_buf = String::new();
+        indices_to_string(&mut str_buf, &alphabet, &arr);
+        assert_eq!(str_buf, "bca", "Strings should equal")
     }
 
     #[test]
@@ -148,8 +149,9 @@ mod tests {
         arr[2] = 1;
         arr[3] = 2;
         arr[4] = 0;
-        let str = indices_to_string(&alphabet, &arr);
-        assert_eq!(str, "bbbca", "Strings should equal")
+        let mut str_buf = String::new();
+        indices_to_string(&mut str_buf, &alphabet, &arr);
+        assert_eq!(str_buf, "bbbca", "Strings should equal")
     }
 
     #[test]
