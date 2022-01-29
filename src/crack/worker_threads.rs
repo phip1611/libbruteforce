@@ -12,19 +12,21 @@ use crate::crack::parameter::InternalCrackParameter;
 use crate::CrackTarget;
 
 /// Spawns all worker threads.
-pub fn spawn_worker_threads<T: CrackTarget>(
+pub(crate) fn spawn_worker_threads<T: CrackTarget>(
     params: Arc<InternalCrackParameter<T>>,
     done: Arc<AtomicBool>,
 ) -> Vec<JoinHandle<Option<String>>> {
     let mut handles = vec![];
     // spawn thread for each cpu
-    for tid in 0..params.thread_count {
+    for tid in 0..params.thread_count() {
         // indices object, that each thread gets as starting point
-        let mut indices =
-            indices_create(params.crack_param.max_length, params.crack_param.min_length);
+        let mut indices = indices_create(
+            params.crack_param().max_length(),
+            params.crack_param().min_length(),
+        );
 
         // alternate indices object for the next thread
-        indices_increment_by(&params.crack_param.alphabet, &mut indices, tid)
+        indices_increment_by(&params.crack_param().alphabet(), &mut indices, tid)
             .expect("Increment failed");
 
         handles.push(spawn_worker_thread(
@@ -89,9 +91,9 @@ fn spawn_worker_thread<T: CrackTarget>(
             // the actual cracking
             {
                 let res = indices_increment_by(
-                    &params.crack_param.alphabet,
+                    &params.crack_param().alphabet(),
                     &mut indices,
-                    params.thread_count,
+                    params.thread_count(),
                 );
                 if res.is_err() {
                     info!(
@@ -106,14 +108,13 @@ fn spawn_worker_thread<T: CrackTarget>(
                 // build string
                 indices_to_string(
                     &mut current_crack_string,
-                    &params.crack_param.alphabet,
+                    &params.crack_param().alphabet(),
                     &indices,
                 );
 
                 // transform; e.g. hashing
                 // extra parentheses to prevent "field, not a method" error
-                let hash_output = (params.crack_param.transform_fn)(&current_crack_string);
-                if hash_output == params.crack_param.target {
+                if params.hash_matches(current_crack_string.as_str()) {
                     info!(
                         "Thread {:>2} found a solution at a progress of {:>6.2}%!",
                         tid,
@@ -134,7 +135,7 @@ fn spawn_worker_thread<T: CrackTarget>(
 /// executed.
 #[inline]
 fn get_percent<T: CrackTarget>(cp: &InternalCrackParameter<T>, iteration_count: u64) -> f32 {
-    let total = cp.combinations_p_t as f32;
+    let total = cp.combinations_p_t() as f32;
     let current = iteration_count as f32;
     current / total * 100.0
 }

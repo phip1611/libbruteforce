@@ -2,56 +2,66 @@
 //! whole multithreaded cracking process.
 
 use crate::symbols::combinations_count;
-use crate::transform_fns::TransformFn;
-use crate::CrackTarget;
+use crate::{CrackTarget, TargetHashAndHashFunction, TargetHashAndHashFunctionTrait};
 use std::fmt::{Debug, Formatter};
 
-/// Describes the necessary parameters for the `crack`-function. This is part of
-/// the public API.
+/// Describes the necessary parameters for the [`crate::crack`]-function.
 pub struct CrackParameter<T: CrackTarget> {
-    /// hash to crack
-    pub target: T,
+    /// Target hash and hashing algorithm.
+    crack_info: TargetHashAndHashFunction<T>,
     /// all symbols (letters, digits, ...)
-    pub alphabet: Box<[char]>,
+    alphabet: Box<[char]>,
     /// maximum crack length (to limit possible combinations)
-    pub max_length: u32,
+    max_length: u32,
     /// minimum crack length (to limit possible combinations)
-    pub min_length: u32,
-    /// hashing function
-    pub transform_fn: TransformFn<T>,
+    min_length: u32,
     /// use n-1 threads to save system resources
-    pub fair_mode: bool,
+    fair_mode: bool,
 }
 
 impl<T: CrackTarget> CrackParameter<T> {
+    /// Constructor.
     pub fn new(
-        target: T,
+        crack_info: TargetHashAndHashFunction<T>,
         alphabet: Box<[char]>,
         max_length: u32,
         min_length: u32,
-        transform_fn: TransformFn<T>,
         fair_mode: bool,
     ) -> Self {
         Self {
-            target,
+            crack_info,
             alphabet,
             max_length,
             min_length,
-            transform_fn,
             fair_mode,
         }
+    }
+
+    pub fn crack_info(&self) -> &TargetHashAndHashFunction<T> {
+        &self.crack_info
+    }
+    pub fn alphabet(&self) -> &Box<[char]> {
+        &self.alphabet
+    }
+    pub fn max_length(&self) -> u32 {
+        self.max_length
+    }
+    pub fn min_length(&self) -> u32 {
+        self.min_length
+    }
+    pub fn fair_mode(&self) -> bool {
+        self.fair_mode
     }
 }
 
 impl<T: CrackTarget> Debug for CrackParameter<T> {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("CrackParameter")
-            .field("target", &self.target)
+            .field("crack_info", &self.crack_info)
             .field("alphabet", &self.alphabet)
             .field("max_length", &self.max_length)
             .field("min_length", &self.min_length)
             .field("fair_mode", &self.fair_mode)
-            .field("transform_fn", &"<code>")
             .finish()
     }
 }
@@ -59,20 +69,39 @@ impl<T: CrackTarget> Debug for CrackParameter<T> {
 /// Internal wrapper around [`CrackParameter`], that holds important information for
 /// the cracking process.
 #[derive(Debug)]
-pub struct InternalCrackParameter<T: CrackTarget> {
+pub(crate) struct InternalCrackParameter<T: CrackTarget> {
     /// See [`CrackParameter`].
-    pub crack_param: CrackParameter<T>,
+    crack_param: CrackParameter<T>,
     /// thread count
-    pub thread_count: usize,
+    thread_count: usize,
     /// total combinations (given by alphabet and length)
-    pub combinations_total: usize,
+    combinations_total: usize,
     /// Max possible combinations per thread (```combinations_total / thread_count```).
     /// If ```combinations_total % thread_count != 0``` then this value will
     /// be rounded down. This is only for informational use, the internal algorithm will
     /// still consider all possible combinations.
     ///
     /// A thread reaches this number only in worst case.
-    pub combinations_p_t: usize,
+    combinations_p_t: usize,
+}
+
+impl<T: CrackTarget> InternalCrackParameter<T> {
+    pub fn crack_param(&self) -> &CrackParameter<T> {
+        &self.crack_param
+    }
+    pub fn thread_count(&self) -> usize {
+        self.thread_count
+    }
+    pub fn combinations_total(&self) -> usize {
+        self.combinations_total
+    }
+    pub fn combinations_p_t(&self) -> usize {
+        self.combinations_p_t
+    }
+    /// Convenient shortcut around [`crate::TargetHashAndHashFunctionTrait::hash_matches`].
+    pub fn hash_matches(&self, input: &str) -> bool {
+        self.crack_param().crack_info().hash_matches(input)
+    }
 }
 
 impl<T: CrackTarget> From<CrackParameter<T>> for InternalCrackParameter<T> {

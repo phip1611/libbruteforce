@@ -19,7 +19,7 @@ mod worker_threads;
 /// any alphabet you want to use. You must provide a transformation function. There is a pre-build
 /// set of transformation functions available, such as `transform_fns::NO_HASHING`, or
 /// `transform_fns::SHA256`. You can also provide your own function if it is compatible
-/// with `transform_fns::TransformFn`.
+/// with TODO.
 ///
 /// This library is really "dumb". It checks each possible value and doesn't use any probabilities
 /// for more or less probable passwords.
@@ -44,28 +44,31 @@ pub fn crack<T: CrackTarget>(cp: CrackParameter<T>) -> CrackResult<T> {
         .flatten()
         .last(); // extract from the collection
 
-    let seconds = instant.elapsed().as_millis() as f64 / 1000_f64;
+    let seconds = instant.elapsed().as_secs_f64();
 
     let cp = Arc::try_unwrap(cp).unwrap_or_else(|_| panic!("There should only be one reference!"));
     if let Some(solution) = solution {
-        CrackResult::success(cp, seconds, solution)
+        CrackResult::new_success(cp, seconds, solution)
     } else {
-        CrackResult::failure(cp, seconds)
+        CrackResult::new_failure(cp, seconds)
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use crate::transform_fns::NO_HASHING;
-    use crate::util;
+    use crate::testutil::{
+        create_test_crack_params_full_alphabet, create_test_crack_params_full_alphabet_sha256,
+        create_test_crack_params_full_alphabet_sha256_fair,
+    };
+    use crate::transform_fns::{no_hashing};
 
     use super::*;
 
     #[test]
     #[should_panic]
     fn test_crack_should_panic_1() {
-        let input = String::from("a+c");
-        let cp = CrackParameter::new(input, vec!['a'].into_boxed_slice(), 4, 5, NO_HASHING, false);
+        let input = "a+c";
+        let cp = CrackParameter::new(no_hashing(input), vec!['a'].into_boxed_slice(), 4, 5, false);
         // expect panic; min > max
         let _res = crack(cp);
     }
@@ -73,8 +76,8 @@ mod tests {
     #[test]
 
     fn test_crack_dont_find_bc_of_min_length() {
-        let input = String::from("a+c");
-        let cp = CrackParameter::new(input, vec!['a'].into_boxed_slice(), 4, 3, NO_HASHING, false);
+        let input = "a+c";
+        let cp = CrackParameter::new(no_hashing(input), vec!['a'].into_boxed_slice(), 4, 3, false);
         // expect panic; min > max
         let res = crack(cp);
         assert!(
@@ -87,11 +90,11 @@ mod tests {
     fn test_crack_identity() {
         let input = String::from("a+c");
         let target = input.clone(); // identity hashing
-        let cp = util::create_test_crack_params_full_alphabet(&target);
+        let cp = create_test_crack_params_full_alphabet(&target);
         let res = crack(cp);
         assert!(res.is_success(), "a solution must be found!");
         assert!(
-            input.eq(res.solution.as_ref().unwrap()),
+            input.eq(res.solution().as_ref().unwrap()),
             "target and cracked result must equal!"
         );
     }
@@ -103,28 +106,28 @@ mod tests {
         let target =
             String::from("3d7edde33628331676b39e19a3f2bdb3c583960ad8d865351a32e2ace7d8e02d");
 
-        let cp = util::create_test_crack_params_full_alphabet_sha256(&target);
-        let cp_fair = util::create_test_crack_params_full_alphabet_sha256_fair(&target);
+        let cp = create_test_crack_params_full_alphabet_sha256(&target);
+        let cp_fair = create_test_crack_params_full_alphabet_sha256_fair(&target);
 
         let res = crack(cp);
         assert!(res.is_success(), "A solution MUST be found!");
         assert!(
-            input.eq(res.solution.as_ref().unwrap()),
+            input.eq(res.solution().as_ref().unwrap()),
             "The cracked value is wrong! It's"
         );
 
         if num_cpus::get() > 1 {
-            assert!(cp_fair.fair_mode, "Fair mode must be activated"); // check if really multiple threads are used
-            assert!(res.thread_count > 1, "multiple threads must be used"); // check if really multiple threads are used
+            assert!(cp_fair.fair_mode(), "Fair mode must be activated"); // check if really multiple threads are used
+            assert!(res.thread_count() > 1, "multiple threads must be used"); // check if really multiple threads are used
 
             let res_fair = crack(cp_fair);
             assert!(res_fair.is_success(), "A solution MUST be found!");
             assert!(
-                input.eq(res.solution.as_ref().unwrap()),
+                input.eq(res.solution().as_ref().unwrap()),
                 "The cracked value is wrong!"
             );
             assert!(
-                res.thread_count > res_fair.thread_count,
+                res.thread_count() > res_fair.thread_count(),
                 "fair mode must use less treads!"
             );
         }
