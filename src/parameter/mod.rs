@@ -21,6 +21,16 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
+//! This module contains types for the relatively complex input parameters of
+//! [`crate::crack<T: CrackTarget>()`]. [`CrackParameter`] consists of the two
+//! building blocks [`BasicCrackParameter`] and [`TargetHashAndHashFunction<T>`].
+//!
+//! This separation exists because experience showed that usage of the library
+//! is relatively hard under certain circumstances because the highly generic
+//! part of [`TargetHashAndHashFunction<T>`] can cause lots of headache when you
+//! want to provide a custom selection of the hashing algorithm during runtime.
+//! An example how this can be done is given in the examples inside the repository.
+
 mod basic;
 mod internal;
 mod target_hash;
@@ -32,9 +42,9 @@ pub use target_hash::*;
 
 pub(crate) use internal::InternalCrackParameter;
 
-/// Crack parameter for [`crack`]. It combines the basic struct [`BasicCrackParameter`]
-/// with the generic [`TargetHashAndHashFunction`]. This separation exists so that
-/// hash selection functions can be written more convenient.
+/// Crack parameter for [`crate::crack<T: CrackTarget>()`]. It combines the basic struct
+/// [`BasicCrackParameter`] with the generic [`TargetHashAndHashFunction`]. This separation exists
+/// so that hash selection functions can be written more convenient.
 ///
 /// ```rust
 /// use libbruteforce::{BasicCrackParameter, CrackParameter, TargetHashInput};

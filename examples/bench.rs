@@ -79,9 +79,9 @@ fn main() {
         "Did {} iterations in {} threads in {:>7.3}s",
         crack_res.combinations_total(),
         crack_res.thread_count(),
-        crack_res.seconds_as_fraction()
+        crack_res.duration_in_seconds()
     );
-    let iterations_ps = crack_res.combinations_total() as f64 / crack_res.seconds_as_fraction();
+    let iterations_ps = crack_res.combinations_total() as f64 / crack_res.duration_in_seconds();
     let iterations_ps_pt = iterations_ps / crack_res.thread_count() as f64;
     let m_iterations_ps = iterations_ps / 1_000_000.0;
     let m_iterations_ps_pt = iterations_ps_pt / 1_000_000.0;

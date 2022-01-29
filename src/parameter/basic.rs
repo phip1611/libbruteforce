@@ -21,7 +21,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
-/// Describes the necessary parameters for the [`crate::crack`]-function
+/// Describes the necessary parameters for the [`crate::crack<T: CrackTarget>()`]-function
 /// without the generic part that is outsourced to [`crate::TargetHashAndHashFunction`].
 #[derive(Debug)]
 pub struct BasicCrackParameter {
@@ -46,16 +46,16 @@ impl BasicCrackParameter {
         }
     }
 
-    pub fn alphabet(&self) -> &[char] {
+    pub const fn alphabet(&self) -> &[char] {
         &self.alphabet
     }
-    pub fn max_length(&self) -> u32 {
+    pub const fn max_length(&self) -> u32 {
         self.max_length
     }
-    pub fn min_length(&self) -> u32 {
+    pub const fn min_length(&self) -> u32 {
         self.min_length
     }
-    pub fn fair_mode(&self) -> bool {
+    pub const fn fair_mode(&self) -> bool {
         self.fair_mode
     }
 }

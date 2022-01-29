@@ -41,13 +41,13 @@ pub struct CrackResult {
     /// Combinations each thread had to to (in worst case)
     combinations_p_t: usize,
     /// Duration until the solution has been found.
-    seconds_as_fraction: f64,
+    duration_in_seconds: f64,
 }
 
 impl CrackResult {
     fn new<T: CrackTarget>(
         cp: InternalCrackParameter<T>,
-        seconds_as_fraction: f64,
+        duration_in_seconds: f64,
         solution: Option<String>,
     ) -> Self {
         let th = cp.crack_param().target_hash_and_hash_fnc();
@@ -58,7 +58,7 @@ impl CrackResult {
             thread_count: cp.thread_count(),
             combinations_total: cp.combinations_total(),
             combinations_p_t: cp.combinations_p_t(),
-            seconds_as_fraction,
+            duration_in_seconds,
         }
     }
 
@@ -77,29 +77,42 @@ impl CrackResult {
         Self::new(cp, seconds_as_fraction, Some(solution))
     }
 
-    pub fn is_failure(&self) -> bool {
+    /// Returns true, if no solution was found.
+    pub const fn is_failure(&self) -> bool {
         self.solution.is_none()
     }
 
-    pub fn is_success(&self) -> bool {
+    /// Returns true, if a solution was found.
+    pub const fn is_success(&self) -> bool {
         self.solution.is_some()
     }
 
-    pub fn solution(&self) -> &Option<String> {
+    /// Returns the solution, if any.
+    pub const fn solution(&self) -> &Option<String> {
         &self.solution
     }
-    pub fn thread_count(&self) -> usize {
+
+    /// Returns the number of threads that were used.
+    pub const fn thread_count(&self) -> usize {
         self.thread_count
     }
-    pub fn combinations_total(&self) -> usize {
+
+    /// Returns the number of total combinations that would have been possible (worst case).
+    pub const fn combinations_total(&self) -> usize {
         self.combinations_total
     }
-    pub fn combinations_p_t(&self) -> usize {
+
+    /// Returns the number of combinations each thread has to check in the worst case.
+    pub const fn combinations_p_t(&self) -> usize {
         self.combinations_p_t
     }
-    pub fn seconds_as_fraction(&self) -> f64 {
-        self.seconds_as_fraction
+
+    /// Returns the duration of the cracking process in seconds.
+    pub const fn duration_in_seconds(&self) -> f64 {
+        self.duration_in_seconds
     }
+
+    /// Returns the target hash that needed to be cracked.
     pub fn target(&self) -> &str {
         &self.target
     }

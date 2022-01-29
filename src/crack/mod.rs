@@ -21,6 +21,9 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
+//! Contains the actual cracking algorithm, the multi-threading with worker-threads,
+//! and the final generation of [`CrackResult`].
+
 pub use result::CrackResult;
 
 mod indices;

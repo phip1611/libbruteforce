@@ -21,6 +21,8 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
+//! Exports the hashing algorithm [`md5_hashing`].
+
 use crate::{TargetHashAndHashFunction, TargetHashInput};
 use md5::digest::Output;
 use md5::{Digest, Md5};
@@ -31,7 +33,7 @@ pub fn md5_hashing(input: TargetHashInput) -> TargetHashAndHashFunction<Md5Hash>
     TargetHashAndHashFunction::new(input, md5, str_to_md5_hash, md5_hash_to_string)
 }
 
-pub type Md5Hash = Output<Md5>;
+pub(crate) type Md5Hash = Output<Md5>;
 
 fn md5(input: &str) -> Md5Hash {
     let mut m = Md5::new();

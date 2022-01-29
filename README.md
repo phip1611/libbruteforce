@@ -19,14 +19,15 @@ follow the steps here:
 - <https://deterministic.space/high-performance-rust.html>
 
 #### MSRV
-1.52.1
+1.56.1
 
 #### Works On
-Linux, MacOS, Windows (targets with `std` library)
+Linux, MacOS, Windows (targets with Rusts standard library)
 
-#### Hint
-Always execute this library in release mode, e.g. `cargo run --bin bench --release`. Otherwise,
-the performance is really poor.
+#### Performance Hint
+Always execute binaries that use this library in release mode, e.g. `cargo run --bin bench --release`.
+Otherwise, the performance is really poor. For maximum Rust performance, see:
+<https://deterministic.space/high-performance-rust.html>
 
 #### Example usage
 ```rust

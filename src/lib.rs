@@ -21,10 +21,14 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
-//! This library helps you to brute force hashes (e.g. passwords). It includes a set of pre-configured
-//! hashing functions, like md5 or sha256. You can also provide your own hashing function. PLEASE DO NOT
-//! use this software to harm someones privacy in any kind! This project was made for fun and for teaching myself
-//! new things about Rust.
+//! This library helps you to brute force hashes (e.g. passwords). It includes a set of
+//! pre-configured hashing functions, like md5 ([`crate::hash_fncs::md5_hashing`]),
+//! sha1 ([`crate::hash_fncs::sha1_hashing`]), or sha256 ([`crate::hash_fncs::sha256_hashing`]).
+//! You can also provide your own hashing function. PLEASE DO NOT use this software to harm
+//! someones privacy in any kind! This project was made for fun and for teaching myself new
+//! things about Rust.
+//!
+//! The main function of this crate is [`crack<T: CrackTarget>()`].
 //!
 //! # Minimal example
 //! ```rust

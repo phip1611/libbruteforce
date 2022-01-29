@@ -48,7 +48,7 @@ pub(crate) fn spawn_worker_threads<T: CrackTarget>(
         );
 
         // alternate indices object for the next thread
-        indices_increment_by(&params.crack_param().alphabet(), &mut indices, tid)
+        indices_increment_by(params.crack_param().alphabet(), &mut indices, tid)
             .expect("Increment failed");
 
         handles.push(spawn_worker_thread(
@@ -113,7 +113,7 @@ fn spawn_worker_thread<T: CrackTarget>(
             // the actual cracking
             {
                 let res = indices_increment_by(
-                    &params.crack_param().alphabet(),
+                    params.crack_param().alphabet(),
                     &mut indices,
                     params.thread_count(),
                 );
@@ -130,7 +130,7 @@ fn spawn_worker_thread<T: CrackTarget>(
                 // build string
                 indices_to_string(
                     &mut current_crack_string,
-                    &params.crack_param().alphabet(),
+                    params.crack_param().alphabet(),
                     &indices,
                 );
 

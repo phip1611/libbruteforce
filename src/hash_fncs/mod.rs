@@ -21,16 +21,29 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
-// reexport
-pub use crate::hash_fncs::identity::no_hashing;
-pub use crate::hash_fncs::md5::{md5_hashing, Md5Hash};
-pub use crate::hash_fncs::sha1::{sha1_hashing, Sha1Hash};
-pub use crate::hash_fncs::sha256::{sha256_hashing, Sha256Hash};
+//! Pre-defined hashing functions that you might use.
+//! * [`no_hashing`]
+//! * [`md5_hashing`]
+//! * [`sha1_hashing`]
+//! * [`sha256_hashing`]
 
 mod identity;
 mod md5;
 mod sha1;
 mod sha256;
+
+// reexport
+pub use crate::hash_fncs::identity::no_hashing;
+pub use crate::hash_fncs::md5::md5_hashing;
+pub use crate::hash_fncs::sha1::sha1_hashing;
+pub use crate::hash_fncs::sha256::sha256_hashing;
+
+/*#[cfg(test)]
+pub(crate) use crate::hash_fncs::md5::Md5Hash;
+#[cfg(test)]
+pub(crate) use crate::hash_fncs::sha1::Sha1Hash;*/
+#[cfg(test)]
+pub(crate) use crate::hash_fncs::sha256::Sha256Hash;
 
 #[cfg(test)]
 mod tests {

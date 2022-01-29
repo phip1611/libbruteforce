@@ -21,6 +21,8 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
+//! Exports the hashing algorithm [`sha256_hashing`].
+
 use crate::{TargetHashAndHashFunction, TargetHashInput};
 use sha2::digest::Output;
 use sha2::{Digest, Sha256};
@@ -31,7 +33,7 @@ pub fn sha256_hashing(input: TargetHashInput) -> TargetHashAndHashFunction<Sha25
     TargetHashAndHashFunction::new(input, sha256, str_to_sha256_hash, sha256_hash_to_string)
 }
 
-pub type Sha256Hash = Output<Sha256>;
+pub(crate) type Sha256Hash = Output<Sha256>;
 
 fn sha256(input: &str) -> Sha256Hash {
     let mut hasher = Sha256::new();

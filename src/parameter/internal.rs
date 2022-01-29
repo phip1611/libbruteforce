@@ -69,7 +69,7 @@ impl<T: CrackTarget> From<CrackParameter<T>> for InternalCrackParameter<T> {
     /// what the user/programmer has given the lib through the public api.
     fn from(cp: CrackParameter<T>) -> Self {
         let combinations_total = combination_count(
-            &cp.basic.alphabet(),
+            cp.basic.alphabet(),
             cp.basic.max_length(),
             cp.basic.min_length(),
         );

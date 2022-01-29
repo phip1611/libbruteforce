@@ -21,6 +21,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
+//! Exports the hashing algorithm [`no_hashing`].
 use crate::{TargetHashAndHashFunction, TargetHashInput};
 
 /// Returns a [`TargetHashAndHashFunction`] object that does no hashing but works
@@ -34,6 +35,7 @@ fn identity(input: &str) -> String {
     String::from(input)
 }
 
+#[allow(clippy::ptr_arg)]
 fn string_ref_to_string(input: &String) -> String {
     String::from(input)
 }

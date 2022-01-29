@@ -21,8 +21,6 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
-//! The readme.md example and the example in lib.rs module description.
-
 use libbruteforce::hash_fncs::sha256_hashing;
 use libbruteforce::BasicCrackParameter;
 use libbruteforce::{symbols, CrackParameter, TargetHashInput};
@@ -49,6 +47,6 @@ fn main() {
 
     if let Some(solution) = res.solution() {
         println!("Password is: {}", solution);
-        println!("Took {:.3}s", res.seconds_as_fraction());
+        println!("Took {:.3}s", res.duration_in_seconds());
     }
 }
