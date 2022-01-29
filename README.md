@@ -61,7 +61,3 @@ fn main() {
     }
 }
 ```
-
-
-README on github: <https://github.com/phip1611/bruteforcer>
-Documentation on docs.rs: <https://docs.rs/libbruteforce/>
