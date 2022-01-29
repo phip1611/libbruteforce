@@ -17,7 +17,7 @@ jobs:
                 rust:
                     - stable
                     - nightly
-                    - 1.52.1 # MSVR
+                    - 1.56.1 # MSVR
         steps:
             -   uses: actions/checkout@v2
             -   name: Build

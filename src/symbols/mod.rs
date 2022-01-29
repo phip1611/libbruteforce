@@ -1,3 +1,26 @@
+/*
+MIT License
+
+Copyright (c) 2022 Philipp Schuster
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+*/
 //! This module contains prebuilt alphabets/symbols that you can use.
 
 mod builder;
@@ -39,7 +62,7 @@ pub static ALL_OTHER_SPECIAL_CHARS: [char; 23] = [
 
 /// Calculates the amount of possible permutations if n symbols are given and m slots are available.
 /// This solutions counts in that the value can be zero-length, one-length and so on.
-pub fn combinations_count(alphabet: &[char], max_length: u32, min_length: u32) -> usize {
+pub fn combination_count(alphabet: &[char], max_length: u32, min_length: u32) -> usize {
     if min_length > max_length {
         panic!("max_length must be >= min_length")
     }
@@ -62,38 +85,38 @@ mod tests {
         let alphabet4: Box<[char]> = Box::from([]);
         let alphabet5: Box<[char]> = Box::from(DIGITS);
         assert_eq!(
-            combinations_count(&alphabet1, 3, 0),
+            combination_count(&alphabet1, 3, 0),
             4,
             "1 symbol and a maximum length of 3"
         );
         assert_eq!(
-            combinations_count(&alphabet1, 3, 3),
+            combination_count(&alphabet1, 3, 3),
             1,
             "1 symbol, min=2, max=3 => 2 combination"
         );
         assert_eq!(
-            combinations_count(&alphabet1, 3, 3),
+            combination_count(&alphabet1, 3, 3),
             1,
             "1 symbol, min=3, max=3 => 1 combination"
         );
         assert_eq!(
-            combinations_count(&alphabet2, 1, 0),
+            combination_count(&alphabet2, 1, 0),
             4,
             "3 symbols and a maximum length of 1"
         );
         assert_eq!(
-            combinations_count(&alphabet2, 2, 1),
+            combination_count(&alphabet2, 2, 1),
             12,
             "3 symbols, min=1, max=2 => 9 combination"
         );
         assert_eq!(
-            combinations_count(&alphabet3, 3, 0),
+            combination_count(&alphabet3, 3, 0),
             15,
             "3 symbols and a maximum length of 3"
         );
-        assert_eq!(combinations_count(&alphabet4, 0, 0), 1, "0 symbols");
-        assert_eq!(combinations_count(&alphabet4, 0, 0), 1, "0 symbols");
-        assert_eq!(combinations_count(&alphabet5, 4, 4), 10_000);
+        assert_eq!(combination_count(&alphabet4, 0, 0), 1, "0 symbols");
+        assert_eq!(combination_count(&alphabet4, 0, 0), 1, "0 symbols");
+        assert_eq!(combination_count(&alphabet5, 4, 4), 10_000);
     }
 
     #[test]
@@ -101,7 +124,7 @@ mod tests {
     fn test_combinations_count_panic() {
         let alphabet: Box<[char]> = Box::from(['a']);
         assert_eq!(
-            combinations_count(&alphabet, 0, 1),
+            combination_count(&alphabet, 0, 1),
             0,
             "min length must be <= max length"
         );

@@ -1,8 +1,8 @@
 [package]
 name = "libbruteforce"
-version = "3.0.1"
+version = "4.0.0"
 authors = ["Philipp Schuster <phip1611@gmail.com>"]
-edition = "2018"
+edition = "2021"
 license = "MIT"
 description = '''
 This library helps you to brute force hashes (e.g. passwords). It includes a set of pre-configured

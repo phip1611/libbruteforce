@@ -1,3 +1,26 @@
+/*
+MIT License
+
+Copyright (c) 2022 Philipp Schuster
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+*/
 //! This module describes all structures and functions related with "indices".
 //! Indices is the representation of a possible combination in our cracking
 //! process. The indices array has the length of the maximum crack size.
@@ -98,7 +121,7 @@ pub fn indices_increment_by(
 
 #[cfg(test)]
 mod tests {
-    use crate::symbols::combinations_count;
+    use crate::symbols::combination_count;
 
     use super::*;
 
@@ -209,7 +232,7 @@ mod tests {
         let mut indices = indices_create(len, 0);
         // should make -1 -1 -1 to 2 2 2
         // minus one because we are already at the first element (-1, -1, -1)
-        let steps = combinations_count(&alphabet, len, 0) - 1;
+        let steps = combination_count(&alphabet, len, 0) - 1;
         indices_increment_by(&alphabet, &mut indices, steps).unwrap();
         for i in 0..len {
             assert_eq!(indices[i as usize], (alphabet.len() - 1) as isize)

@@ -21,11 +21,21 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
-//! Contains the actual cracking algorithm, the multi-threading with worker-threads,
-//! and the final generation of [`CrackResult`].
+//! Exports the hashing algorithm [`no_hashing`].
+use crate::{TargetHashAndHashFunction, TargetHashInput};
 
-pub use result::CrackResult;
+/// Returns a [`TargetHashAndHashFunction`] object that does no hashing but works
+/// on plain text/strings. Useful for debugging and testing.
+/// It gets initialized with a object of type [`TargetHashInput`].
+pub fn no_hashing(input: TargetHashInput) -> TargetHashAndHashFunction<String> {
+    TargetHashAndHashFunction::new(input, identity, identity, string_ref_to_string)
+}
 
-mod indices;
-mod result;
-pub(crate) mod worker_threads;
+fn identity(input: &str) -> String {
+    String::from(input)
+}
+
+#[allow(clippy::ptr_arg)]
+fn string_ref_to_string(input: &String) -> String {
+    String::from(input)
+}

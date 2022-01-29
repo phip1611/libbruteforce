@@ -1,3 +1,26 @@
+/*
+MIT License
+
+Copyright (c) 2022 Philipp Schuster
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+*/
 //! All functions related for the multithreaded cracking process.
 //! The actual cracking happens here in the closure in [`spawn_worker_thread`].
 
@@ -8,23 +31,24 @@ use std::thread;
 use std::thread::JoinHandle;
 
 use crate::crack::indices::{indices_create, indices_increment_by, indices_to_string};
-use crate::crack::parameter::InternalCrackParameter;
-use crate::CrackTarget;
+use crate::{CrackTarget, InternalCrackParameter};
 
 /// Spawns all worker threads.
-pub fn spawn_worker_threads<T: CrackTarget>(
+pub(crate) fn spawn_worker_threads<T: CrackTarget>(
     params: Arc<InternalCrackParameter<T>>,
     done: Arc<AtomicBool>,
 ) -> Vec<JoinHandle<Option<String>>> {
     let mut handles = vec![];
     // spawn thread for each cpu
-    for tid in 0..params.thread_count {
+    for tid in 0..params.thread_count() {
         // indices object, that each thread gets as starting point
-        let mut indices =
-            indices_create(params.crack_param.max_length, params.crack_param.min_length);
+        let mut indices = indices_create(
+            params.crack_param().max_length(),
+            params.crack_param().min_length(),
+        );
 
         // alternate indices object for the next thread
-        indices_increment_by(&params.crack_param.alphabet, &mut indices, tid)
+        indices_increment_by(params.crack_param().alphabet(), &mut indices, tid)
             .expect("Increment failed");
 
         handles.push(spawn_worker_thread(
@@ -89,9 +113,9 @@ fn spawn_worker_thread<T: CrackTarget>(
             // the actual cracking
             {
                 let res = indices_increment_by(
-                    &params.crack_param.alphabet,
+                    params.crack_param().alphabet(),
                     &mut indices,
-                    params.thread_count,
+                    params.thread_count(),
                 );
                 if res.is_err() {
                     info!(
@@ -106,14 +130,13 @@ fn spawn_worker_thread<T: CrackTarget>(
                 // build string
                 indices_to_string(
                     &mut current_crack_string,
-                    &params.crack_param.alphabet,
+                    params.crack_param().alphabet(),
                     &indices,
                 );
 
                 // transform; e.g. hashing
                 // extra parentheses to prevent "field, not a method" error
-                let hash_output = (params.crack_param.transform_fn)(&current_crack_string);
-                if hash_output == params.crack_param.target {
+                if params.hash_matches(current_crack_string.as_str()) {
                     info!(
                         "Thread {:>2} found a solution at a progress of {:>6.2}%!",
                         tid,
@@ -134,7 +157,7 @@ fn spawn_worker_thread<T: CrackTarget>(
 /// executed.
 #[inline]
 fn get_percent<T: CrackTarget>(cp: &InternalCrackParameter<T>, iteration_count: u64) -> f32 {
-    let total = cp.combinations_p_t as f32;
+    let total = cp.combinations_p_t() as f32;
     let current = iteration_count as f32;
     current / total * 100.0
 }
