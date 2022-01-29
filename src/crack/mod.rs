@@ -4,7 +4,6 @@ use std::time::Instant;
 
 use crate::crack::parameter::CrackParameter;
 use crate::CrackTarget;
-use parameter::BasicCrackParameter;
 use parameter::InternalCrackParameter;
 use result::CrackResult;
 use worker_threads::spawn_worker_threads;
@@ -65,7 +64,7 @@ mod tests {
         create_test_crack_params_full_alphabet_sha256_fair,
     };
     use crate::hash_fncs::no_hashing;
-    use crate::TargetHashInput;
+    use crate::{BasicCrackParameter, TargetHashInput};
 
     use super::*;
 

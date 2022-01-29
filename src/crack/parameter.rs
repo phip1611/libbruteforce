@@ -3,7 +3,7 @@
 
 use crate::symbols::combinations_count;
 use crate::{CrackTarget, TargetHashAndHashFunction};
-use std::fmt::{Debug, Formatter};
+use std::fmt::Debug;
 
 /// Crack parameter for [`crack`]. It combines the basic struct [`BasicCrackParameter`]
 /// with the generic [`TargetHashAndHashFunction`]. This separation exists so that

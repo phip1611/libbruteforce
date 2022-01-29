@@ -4,10 +4,9 @@
 //!
 //! PS: RUN THIS IN RELEASE MODE (= a lot faster). `cargo run --bin bench --release`
 
-use libbruteforce::hash_fncs::{sha256_hashing, Sha256Hash};
+use libbruteforce::hash_fncs::{sha256_hashing};
 use libbruteforce::symbols::{combinations_count, Builder};
 use libbruteforce::{BasicCrackParameter, CrackParameter, TargetHashInput};
-use sha2::Sha256;
 use simple_logger::SimpleLogger;
 
 fn main() {
