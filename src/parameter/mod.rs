@@ -63,6 +63,7 @@ pub(crate) use internal::InternalCrackParameter;
 /// );
 /// ```
 #[derive(Debug)]
+#[allow(rustdoc::private_doc_tests)]
 pub struct CrackParameter<T: CrackTarget> {
     /// Basic parameters.
     basic: BasicCrackParameter,
@@ -70,6 +71,7 @@ pub struct CrackParameter<T: CrackTarget> {
     target_hash_and_hash_fnc: TargetHashAndHashFunction<T>,
 }
 
+#[allow(rustdoc::private_doc_tests)]
 impl<T: CrackTarget> CrackParameter<T> {
     /// Constructor.
     ///
