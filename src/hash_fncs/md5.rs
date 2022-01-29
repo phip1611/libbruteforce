@@ -1,16 +1,11 @@
+use crate::{TargetHashAndHashFunction, TargetHashInput};
 use md5::digest::Output;
 use md5::{Digest, Md5};
-use crate::{TargetHashAndHashFunction, TargetHashInput};
 
 /// Returns a [`TargetHashAndHashFunction`] object that does [`mod@md5`] hashing.
 /// It gets initialized with a object of type [`TargetHashInput`].
 pub fn md5_hashing(input: TargetHashInput) -> TargetHashAndHashFunction<Md5Hash> {
-    TargetHashAndHashFunction::new(
-        input,
-        md5,
-        str_to_md5_hash,
-        md5_hash_to_string
-    )
+    TargetHashAndHashFunction::new(input, md5, str_to_md5_hash, md5_hash_to_string)
 }
 
 pub type Md5Hash = Output<Md5>;

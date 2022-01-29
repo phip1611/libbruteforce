@@ -11,9 +11,9 @@ mod sha256;
 
 #[cfg(test)]
 mod tests {
-    use crate::{BasicCrackParameter, crack, CrackParameter, TargetHashInput};
-    use crate::symbols;
     use super::*;
+    use crate::symbols;
+    use crate::{crack, BasicCrackParameter, CrackParameter, TargetHashInput};
 
     /// This code is the result of hours of struggling when I tried to generify the selection
     /// of the hashing algorithm. The problem is that each hashing algorithm operates
@@ -25,37 +25,26 @@ mod tests {
     fn test_selection_compiles() {
         let algo = "md5";
         let alphabet = symbols::Builder::new().with_digits().build();
-        let basic_param = BasicCrackParameter::new(
-            alphabet,
-            5,
-            0,
-            true
-        );
+        let basic_param = BasicCrackParameter::new(alphabet, 5, 0, true);
         let user_input = "my-awesome-hash";
-        let res = match algo {
-            "md5" => {
-                crack(
-                    CrackParameter::new(basic_param, md5_hashing(TargetHashInput::Plaintext(user_input)))
-                )
-            }
-            "sha1" => {
-                crack(
-                    CrackParameter::new(basic_param, sha1_hashing(TargetHashInput::Plaintext(user_input)))
-                )
-            }
-            "sha256" => {
-                crack(
-                    CrackParameter::new(basic_param, sha256_hashing(TargetHashInput::Plaintext(user_input)))
-                )
-            }
-            "identity" => {
-                crack(
-                    CrackParameter::new(basic_param, no_hashing(TargetHashInput::Plaintext(user_input)))
-                )
-            }
-            _ => panic!("invalid algorithm")
+        let _res = match algo {
+            "md5" => crack(CrackParameter::new(
+                basic_param,
+                md5_hashing(TargetHashInput::Plaintext(user_input)),
+            )),
+            "sha1" => crack(CrackParameter::new(
+                basic_param,
+                sha1_hashing(TargetHashInput::Plaintext(user_input)),
+            )),
+            "sha256" => crack(CrackParameter::new(
+                basic_param,
+                sha256_hashing(TargetHashInput::Plaintext(user_input)),
+            )),
+            "identity" => crack(CrackParameter::new(
+                basic_param,
+                no_hashing(TargetHashInput::Plaintext(user_input)),
+            )),
+            _ => panic!("invalid algorithm"),
         };
     }
-
-
 }

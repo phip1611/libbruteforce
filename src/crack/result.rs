@@ -1,7 +1,6 @@
 //! Describes the result of the cracking process.
 
-use crate::crack::parameter::InternalCrackParameter;
-use crate::{CrackTarget};
+use crate::{CrackTarget, InternalCrackParameter};
 
 /// Describes the result of a finished cracking process.
 #[derive(Debug)]
@@ -40,7 +39,10 @@ impl CrackResult {
         }
     }
 
-    pub(crate) fn new_failure<T: CrackTarget>(cp: InternalCrackParameter<T>, seconds_as_fraction: f64) -> Self {
+    pub(crate) fn new_failure<T: CrackTarget>(
+        cp: InternalCrackParameter<T>,
+        seconds_as_fraction: f64,
+    ) -> Self {
         Self::new(cp, seconds_as_fraction, None)
     }
 

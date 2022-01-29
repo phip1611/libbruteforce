@@ -4,8 +4,8 @@
 //!
 //! PS: RUN THIS IN RELEASE MODE (= a lot faster). `cargo run --bin bench --release`
 
-use libbruteforce::hash_fncs::{sha256_hashing};
-use libbruteforce::symbols::{combinations_count, Builder};
+use libbruteforce::hash_fncs::sha256_hashing;
+use libbruteforce::symbols::{combination_count, Builder};
 use libbruteforce::{BasicCrackParameter, CrackParameter, TargetHashInput};
 use simple_logger::SimpleLogger;
 
@@ -20,13 +20,14 @@ fn main() {
 
     println!(
         "Start benchmark with {} possible combinations",
-        combinations_count(&alphabet, MAX_LEN, 0)
+        combination_count(&alphabet, MAX_LEN, 0)
     );
     println!("PLEASE MAKE SURE THAT YOU RUN THIS BIN IN RELEASE MODE..OTHERWISE IT TAKES AGES :)");
     let sha256_hashing = sha256_hashing(TargetHashInput::Plaintext(&worst_case_pw));
     println!(
         "Trying to crack '{}'. SHA256 is '{:?}'",
-        worst_case_pw, sha256_hashing.hash_type_to_str_repr(sha256_hashing.target_hash())
+        worst_case_pw,
+        sha256_hashing.hash_type_to_str_repr(sha256_hashing.target_hash())
     );
 
     // the actual cracking
@@ -34,7 +35,6 @@ fn main() {
         BasicCrackParameter::new(alphabet, MAX_LEN, 0, false),
         sha256_hashing,
     ));
-
 
     assert!(
         crack_res.is_success(),

@@ -98,7 +98,7 @@ pub fn indices_increment_by(
 
 #[cfg(test)]
 mod tests {
-    use crate::symbols::combinations_count;
+    use crate::symbols::combination_count;
 
     use super::*;
 
@@ -209,7 +209,7 @@ mod tests {
         let mut indices = indices_create(len, 0);
         // should make -1 -1 -1 to 2 2 2
         // minus one because we are already at the first element (-1, -1, -1)
-        let steps = combinations_count(&alphabet, len, 0) - 1;
+        let steps = combination_count(&alphabet, len, 0) - 1;
         indices_increment_by(&alphabet, &mut indices, steps).unwrap();
         for i in 0..len {
             assert_eq!(indices[i as usize], (alphabet.len() - 1) as isize)

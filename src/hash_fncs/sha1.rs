@@ -1,16 +1,11 @@
-use sha1::{Digest, Sha1};
-use sha1::digest::Output;
 use crate::{TargetHashAndHashFunction, TargetHashInput};
+use sha1::digest::Output;
+use sha1::{Digest, Sha1};
 
 /// Returns a [`TargetHashAndHashFunction`] object that does `sha1` hashing using [`mod@sha2`].
 /// It gets initialized with a object of type [`TargetHashInput`].
 pub fn sha1_hashing(input: TargetHashInput) -> TargetHashAndHashFunction<Sha1Hash> {
-    TargetHashAndHashFunction::new(
-        input,
-        sha1,
-        str_to_sha1_hash,
-        sha1_hash_to_string,
-    )
+    TargetHashAndHashFunction::new(input, sha1, str_to_sha1_hash, sha1_hash_to_string)
 }
 
 pub type Sha1Hash = Output<Sha1>;

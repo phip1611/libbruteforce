@@ -6,10 +6,9 @@
 //!
 //! This module will also contain benchmarking utility functions.
 
-use crate::crack::parameter::{BasicCrackParameter, CrackParameter};
-use crate::symbols::Builder;
 use crate::hash_fncs::{no_hashing, sha256_hashing, Sha256Hash};
-use crate::TargetHashInput;
+use crate::symbols::Builder;
+use crate::{BasicCrackParameter, CrackParameter, TargetHashInput};
 
 /// Creates CrackParameter for full alphabet with identity hashing.
 pub fn create_test_crack_params_full_alphabet(target: &str) -> CrackParameter<String> {

@@ -1,16 +1,11 @@
+use crate::{TargetHashAndHashFunction, TargetHashInput};
 use sha2::digest::Output;
 use sha2::{Digest, Sha256};
-use crate::{TargetHashAndHashFunction, TargetHashInput};
 
 /// Returns a [`TargetHashAndHashFunction`] object that does sha256 hashing using [`mod@sha2`].
 /// It gets initialized with a object of type [`TargetHashInput`].
 pub fn sha256_hashing(input: TargetHashInput) -> TargetHashAndHashFunction<Sha256Hash> {
-    TargetHashAndHashFunction::new(
-        input,
-        sha256,
-        str_to_sha256_hash,
-        sha256_hash_to_string
-    )
+    TargetHashAndHashFunction::new(input, sha256, str_to_sha256_hash, sha256_hash_to_string)
 }
 
 pub type Sha256Hash = Output<Sha256>;
