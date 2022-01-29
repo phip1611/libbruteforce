@@ -1,8 +1,8 @@
 //! The readme.md example and the example in lib.rs module description.
 
-use libbruteforce::symbols;
-use libbruteforce::transform_fns::{sha256_hashing};
-use libbruteforce::CrackParameter;
+use libbruteforce::hash_fncs::sha256_hashing;
+use libbruteforce::BasicCrackParameter;
+use libbruteforce::{symbols, CrackParameter, TargetHashInput};
 use simple_logger::SimpleLogger;
 
 /// Minimal example.
@@ -17,15 +17,11 @@ fn main() {
 
     // sha256("a+c")
     let sha256_hash = "3d7edde33628331676b39e19a3f2bdb3c583960ad8d865351a32e2ace7d8e02d";
-    let sha256_hashing = sha256_hashing("3d7edde33628331676b39e19a3f2bdb3c583960ad8d865351a32e2ace7d8e02d");
 
     // the actual cracking
     let res = libbruteforce::crack(CrackParameter::new(
-        sha256_hashing,
-        alphabet,
-        3,
-        0,
-        true,
+        BasicCrackParameter::new(alphabet, 3, 0, true),
+        sha256_hashing(TargetHashInput::HashAsStr(sha256_hash)),
     ));
 
     if let Some(solution) = res.solution() {

@@ -2,8 +2,9 @@ use std::sync::atomic::AtomicBool;
 use std::sync::Arc;
 use std::time::Instant;
 
+use crate::crack::parameter::CrackParameter;
 use crate::CrackTarget;
-use parameter::CrackParameter;
+use parameter::BasicCrackParameter;
 use parameter::InternalCrackParameter;
 use result::CrackResult;
 use worker_threads::spawn_worker_threads;
@@ -15,27 +16,29 @@ mod indices;
 mod result;
 mod worker_threads;
 
-/// This function starts a multithreaded brute force attack on a given target string. It supports
-/// any alphabet you want to use. You must provide a transformation function. There is a pre-build
-/// set of transformation functions available, such as `transform_fns::NO_HASHING`, or
-/// `transform_fns::SHA256`. You can also provide your own function if it is compatible
-/// with TODO.
+/// This function starts a multi-threaded brute force attack on a given target string. It supports
+/// any alphabet you would like to use. You must provide a hashing function. There is a pre-build
+/// set of transformation functions available, such as [`hash_fncs::no_hashing`] or
+/// [`hash_fncs::sha256_hashing`]. You can also provide your own hashing strategy.
 ///
 /// This library is really "dumb". It checks each possible value and doesn't use any probabilities
 /// for more or less probable passwords.
 ///
 /// # Parameters
-/// * `cp` - see [`CrackParameter`]
-pub fn crack<T: CrackTarget>(cp: CrackParameter<T>) -> CrackResult<T> {
-    let cp = InternalCrackParameter::from(cp);
-    let cp = Arc::from(cp);
+/// * `param` - See [`CrackParameter`]
+///
+/// # Return
+/// Returns a [`CrackResult`].
+pub fn crack<T: CrackTarget>(param: CrackParameter<T>) -> CrackResult {
+    let param = InternalCrackParameter::from(param);
+    let param = Arc::from(param);
 
     // shared atomic bool so that all threads can look if one already found a solution
     // so they can stop their work. This only gets checked at every millionth iteration
     // for better performance.
     let done = Arc::from(AtomicBool::from(false));
     let instant = Instant::now();
-    let handles = spawn_worker_threads(cp.clone(), done);
+    let handles = spawn_worker_threads(param.clone(), done);
 
     // wait for all threads
     let solution = handles
@@ -46,11 +49,12 @@ pub fn crack<T: CrackTarget>(cp: CrackParameter<T>) -> CrackResult<T> {
 
     let seconds = instant.elapsed().as_secs_f64();
 
-    let cp = Arc::try_unwrap(cp).unwrap_or_else(|_| panic!("There should only be one reference!"));
+    let param =
+        Arc::try_unwrap(param).unwrap_or_else(|_| panic!("There should only be one reference!"));
     if let Some(solution) = solution {
-        CrackResult::new_success(cp, seconds, solution)
+        CrackResult::new_success(param, seconds, solution)
     } else {
-        CrackResult::new_failure(cp, seconds)
+        CrackResult::new_failure(param, seconds)
     }
 }
 
@@ -60,15 +64,18 @@ mod tests {
         create_test_crack_params_full_alphabet, create_test_crack_params_full_alphabet_sha256,
         create_test_crack_params_full_alphabet_sha256_fair,
     };
-    use crate::transform_fns::{no_hashing};
+    use crate::hash_fncs::no_hashing;
+    use crate::TargetHashInput;
 
     use super::*;
 
     #[test]
     #[should_panic]
     fn test_crack_should_panic_1() {
-        let input = "a+c";
-        let cp = CrackParameter::new(no_hashing(input), vec!['a'].into_boxed_slice(), 4, 5, false);
+        let cp = CrackParameter::new(
+            BasicCrackParameter::new(vec!['a'].into_boxed_slice(), 4, 5, false),
+            no_hashing(TargetHashInput::Plaintext("a+c")),
+        );
         // expect panic; min > max
         let _res = crack(cp);
     }
@@ -76,8 +83,10 @@ mod tests {
     #[test]
 
     fn test_crack_dont_find_bc_of_min_length() {
-        let input = "a+c";
-        let cp = CrackParameter::new(no_hashing(input), vec!['a'].into_boxed_slice(), 4, 3, false);
+        let cp = CrackParameter::new(
+            BasicCrackParameter::new(vec!['a'].into_boxed_slice(), 4, 3, false),
+            no_hashing(TargetHashInput::Plaintext("a+c")),
+        );
         // expect panic; min > max
         let res = crack(cp);
         assert!(

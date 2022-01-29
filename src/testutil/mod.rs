@@ -6,16 +6,20 @@
 //!
 //! This module will also contain benchmarking utility functions.
 
-use crate::crack::parameter::CrackParameter;
+use crate::crack::parameter::{BasicCrackParameter, CrackParameter};
 use crate::symbols::Builder;
-use crate::transform_fns::{no_hashing, sha256_hashing, Sha256Hash};
+use crate::hash_fncs::{no_hashing, sha256_hashing, Sha256Hash};
+use crate::TargetHashInput;
 
 /// Creates CrackParameter for full alphabet with identity hashing.
 pub fn create_test_crack_params_full_alphabet(target: &str) -> CrackParameter<String> {
     let alphabet = Builder::new().full().build();
     let max_len = target.len() as u32;
     let min_len = 0;
-    CrackParameter::new(no_hashing(target), alphabet, max_len, min_len, false)
+    CrackParameter::new(
+        BasicCrackParameter::new(alphabet, max_len, min_len, false),
+        no_hashing(TargetHashInput::HashAsStr(target)),
+    )
 }
 
 /// Creates CrackParameter for full alphabet with sha256 hashing.
@@ -23,7 +27,10 @@ pub fn create_test_crack_params_full_alphabet_sha256(target: &str) -> CrackParam
     let alphabet = Builder::new().full().build();
     let max_len = 6;
     let min_len = 0;
-    CrackParameter::new(sha256_hashing(target), alphabet, max_len, min_len, false)
+    CrackParameter::new(
+        BasicCrackParameter::new(alphabet, max_len, min_len, false),
+        sha256_hashing(TargetHashInput::HashAsStr(target)),
+    )
 }
 
 /// Creates CrackParameter for full alphabet with sha256 hashing and fair mode.
@@ -33,5 +40,8 @@ pub fn create_test_crack_params_full_alphabet_sha256_fair(
     let alphabet = Builder::new().full().build();
     let max_len = 5;
     let min_len = 0;
-    CrackParameter::new(sha256_hashing(target), alphabet, max_len, min_len, true)
+    CrackParameter::new(
+        BasicCrackParameter::new(alphabet, max_len, min_len, true),
+        sha256_hashing(TargetHashInput::HashAsStr(target)),
+    )
 }

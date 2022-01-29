@@ -1,13 +1,13 @@
 //! Describes the result of the cracking process.
 
 use crate::crack::parameter::InternalCrackParameter;
-use crate::{CrackTarget, TargetHashAndHashFunctionTrait};
+use crate::{CrackTarget};
 
 /// Describes the result of a finished cracking process.
 #[derive(Debug)]
-pub struct CrackResult<T: CrackTarget> {
-    /// the target string
-    target: T,
+pub struct CrackResult {
+    /// The target hash string representation.
+    target: String,
     /// The solution to the target string
     solution: Option<String>,
     /// Amount of threads to use.
@@ -22,14 +22,16 @@ pub struct CrackResult<T: CrackTarget> {
     seconds_as_fraction: f64,
 }
 
-impl<T: CrackTarget> CrackResult<T> {
-    fn new(
+impl CrackResult {
+    fn new<T: CrackTarget>(
         cp: InternalCrackParameter<T>,
         seconds_as_fraction: f64,
         solution: Option<String>,
     ) -> Self {
+        let th = cp.crack_param().target_hash_and_hash_fnc();
+        let target_hash_as_str = th.hash_type_to_str_repr(th.target_hash());
         Self {
-            target: cp.crack_param().crack_info().get_target().clone(),
+            target: target_hash_as_str,
             solution,
             thread_count: cp.thread_count(),
             combinations_total: cp.combinations_total(),
@@ -38,11 +40,11 @@ impl<T: CrackTarget> CrackResult<T> {
         }
     }
 
-    pub(crate) fn new_failure(cp: InternalCrackParameter<T>, seconds_as_fraction: f64) -> Self {
+    pub(crate) fn new_failure<T: CrackTarget>(cp: InternalCrackParameter<T>, seconds_as_fraction: f64) -> Self {
         Self::new(cp, seconds_as_fraction, None)
     }
 
-    pub(crate) fn new_success(
+    pub(crate) fn new_success<T: CrackTarget>(
         cp: InternalCrackParameter<T>,
         seconds_as_fraction: f64,
         solution: String,
@@ -58,10 +60,6 @@ impl<T: CrackTarget> CrackResult<T> {
         self.solution.is_some()
     }
 
-
-    pub fn target(&self) -> &T {
-        &self.target
-    }
     pub fn solution(&self) -> &Option<String> {
         &self.solution
     }
@@ -76,5 +74,8 @@ impl<T: CrackTarget> CrackResult<T> {
     }
     pub fn seconds_as_fraction(&self) -> f64 {
         self.seconds_as_fraction
+    }
+    pub fn target(&self) -> &str {
+        &self.target
     }
 }

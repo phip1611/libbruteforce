@@ -45,7 +45,7 @@ fn main() {
     // sha256("a+c")
     let res = libbruteforce::crack(
         CrackParameter::new(
-            sha256_hash.clone(), alphabet, 3, 0, transform_fns::SHA256_HASHING, true,
+            sha256_hash.clone(), alphabet, 3, 0, hash_fncs::SHA256_HASHING, true,
         )
     );
     if res.is_success() {

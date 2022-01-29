@@ -1,15 +1,15 @@
 use md5::digest::Output;
 use md5::{Digest, Md5};
-use crate::TargetHashAndHashFunction;
+use crate::{TargetHashAndHashFunction, TargetHashInput};
 
-/// Returns a [`TargetHashAndHashFunction`] object that does [`md5`] hashing.
-/// It gets initialized with the value we want to crack. The value we want to crack
-/// is a hash in string representation.
-pub fn md5_hashing(target_hash_as_str: &str) -> TargetHashAndHashFunction<Md5Hash> {
+/// Returns a [`TargetHashAndHashFunction`] object that does [`mod@md5`] hashing.
+/// It gets initialized with a object of type [`TargetHashInput`].
+pub fn md5_hashing(input: TargetHashInput) -> TargetHashAndHashFunction<Md5Hash> {
     TargetHashAndHashFunction::new(
-        target_hash_as_str,
+        input,
         md5,
-        str_to_md5_hash
+        str_to_md5_hash,
+        md5_hash_to_string
     )
 }
 
@@ -27,15 +27,18 @@ fn str_to_md5_hash(s: &str) -> Md5Hash {
     target.into()
 }
 
+fn md5_hash_to_string(hash: &Md5Hash) -> String {
+    hex::encode(hash)
+}
+
 #[cfg(test)]
 mod tests {
-    use crate::TargetHashAndHashFunctionTrait;
     use super::*;
 
     #[test]
     fn test_md5() {
         let input = "md5";
         let expected_hash = "1bc29b36f623ba82aaf6724fd3b16718";
-        assert!(md5_hashing(expected_hash).hash_matches(input));
+        assert!(md5_hashing(TargetHashInput::HashAsStr(expected_hash)).hash_matches(input));
     }
 }

@@ -2,13 +2,86 @@
 //! whole multithreaded cracking process.
 
 use crate::symbols::combinations_count;
-use crate::{CrackTarget, TargetHashAndHashFunction, TargetHashAndHashFunctionTrait};
+use crate::{CrackTarget, TargetHashAndHashFunction};
 use std::fmt::{Debug, Formatter};
 
-/// Describes the necessary parameters for the [`crate::crack`]-function.
+/// Crack parameter for [`crack`]. It combines the basic struct [`BasicCrackParameter`]
+/// with the generic [`TargetHashAndHashFunction`]. This separation exists so that
+/// hash selection functions can be written more convenient.
+///
+/// # Example
+/// ```ignore
+/// use libbruteforce::{BasicCrackParameter, CrackParameter, TargetHashInput};
+/// use libbruteforce::hash_fncs::sha256_hashing;
+///
+/// // sha256("a+c")
+/// let sha256_hash = "3d7edde33628331676b39e19a3f2bdb3c583960ad8d865351a32e2ace7d8e02d";
+///
+/// let res = CrackParameter::new(
+///         BasicCrackParameter::new(alphabet, max_len, min_len, false),
+///         sha256_hashing(TargetHashInput::HashAsStr(sha256_hash)),
+/// );
+/// ```
+#[derive(Debug)]
 pub struct CrackParameter<T: CrackTarget> {
+    /// Basic parameters.
+    basic: BasicCrackParameter,
     /// Target hash and hashing algorithm.
-    crack_info: TargetHashAndHashFunction<T>,
+    target_hash_and_hash_fnc: TargetHashAndHashFunction<T>,
+}
+
+impl<T: CrackTarget> CrackParameter<T> {
+    /// Constructor.
+    ///
+    /// # Example
+    /// ```ignore
+    /// use libbruteforce::{BasicCrackParameter, CrackParameter, TargetHashInput};
+    /// use libbruteforce::hash_fncs::sha256_hashing;
+    ///
+    /// // sha256("a+c")
+    /// let sha256_hash = "3d7edde33628331676b39e19a3f2bdb3c583960ad8d865351a32e2ace7d8e02d";
+    ///
+    /// let res = CrackParameter::new(
+    ///         BasicCrackParameter::new(alphabet, max_len, min_len, false),
+    ///         sha256_hashing(TargetHashInput::HashAsStr(sha256_hash)),
+    /// );
+    /// ```
+    pub fn new(basic: BasicCrackParameter, crack_info: TargetHashAndHashFunction<T>) -> Self {
+        Self {
+            basic,
+            target_hash_and_hash_fnc: crack_info,
+        }
+    }
+
+    /// Convenient wrapper for [`BasicCrackParameter::alphabet`].
+    pub fn alphabet(&self) -> &[char] {
+        self.basic.alphabet()
+    }
+
+    /// Convenient wrapper for [`BasicCrackParameter::max_length`].
+    pub fn max_length(&self) -> u32 {
+        self.basic.max_length()
+    }
+
+    /// Convenient wrapper for [`BasicCrackParameter::min_length`].
+    pub fn min_length(&self) -> u32 {
+        self.basic.min_length()
+    }
+
+    /// Convenient wrapper for [`BasicCrackParameter::fair_mode`].
+    pub fn fair_mode(&self) -> bool {
+        self.basic.fair_mode()
+    }
+
+    pub fn target_hash_and_hash_fnc(&self) -> &TargetHashAndHashFunction<T> {
+        &self.target_hash_and_hash_fnc
+    }
+}
+
+/// Describes the necessary parameters for the [`crate::crack`]-function
+/// without the generic part that is outsourced to [`crate::TargetHashAndHashFunction`].
+#[derive(Debug)]
+pub struct BasicCrackParameter {
     /// all symbols (letters, digits, ...)
     alphabet: Box<[char]>,
     /// maximum crack length (to limit possible combinations)
@@ -19,17 +92,10 @@ pub struct CrackParameter<T: CrackTarget> {
     fair_mode: bool,
 }
 
-impl<T: CrackTarget> CrackParameter<T> {
+impl BasicCrackParameter {
     /// Constructor.
-    pub fn new(
-        crack_info: TargetHashAndHashFunction<T>,
-        alphabet: Box<[char]>,
-        max_length: u32,
-        min_length: u32,
-        fair_mode: bool,
-    ) -> Self {
+    pub fn new(alphabet: Box<[char]>, max_length: u32, min_length: u32, fair_mode: bool) -> Self {
         Self {
-            crack_info,
             alphabet,
             max_length,
             min_length,
@@ -37,10 +103,7 @@ impl<T: CrackTarget> CrackParameter<T> {
         }
     }
 
-    pub fn crack_info(&self) -> &TargetHashAndHashFunction<T> {
-        &self.crack_info
-    }
-    pub fn alphabet(&self) -> &Box<[char]> {
+    pub fn alphabet(&self) -> &[char] {
         &self.alphabet
     }
     pub fn max_length(&self) -> u32 {
@@ -54,20 +117,8 @@ impl<T: CrackTarget> CrackParameter<T> {
     }
 }
 
-impl<T: CrackTarget> Debug for CrackParameter<T> {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CrackParameter")
-            .field("crack_info", &self.crack_info)
-            .field("alphabet", &self.alphabet)
-            .field("max_length", &self.max_length)
-            .field("min_length", &self.min_length)
-            .field("fair_mode", &self.fair_mode)
-            .finish()
-    }
-}
-
-/// Internal wrapper around [`CrackParameter`], that holds important information for
-/// the cracking process.
+/// Internal wrapper around [`CrackParameter`], that holds additional
+/// information for the multi-threaded cracking process.
 #[derive(Debug)]
 pub(crate) struct InternalCrackParameter<T: CrackTarget> {
     /// See [`CrackParameter`].
@@ -98,9 +149,11 @@ impl<T: CrackTarget> InternalCrackParameter<T> {
     pub fn combinations_p_t(&self) -> usize {
         self.combinations_p_t
     }
-    /// Convenient shortcut around [`crate::TargetHashAndHashFunctionTrait::hash_matches`].
+    /// Convenient shortcut around [`crate::TargetHashAndHashFunction::hash_matches`].
     pub fn hash_matches(&self, input: &str) -> bool {
-        self.crack_param().crack_info().hash_matches(input)
+        self.crack_param()
+            .target_hash_and_hash_fnc
+            .hash_matches(input)
     }
 }
 
@@ -108,9 +161,10 @@ impl<T: CrackTarget> From<CrackParameter<T>> for InternalCrackParameter<T> {
     /// Creates the object used internally for the cracking process from
     /// what the user/programmer has given the lib through the public api.
     fn from(cp: CrackParameter<T>) -> Self {
-        let combinations_total = combinations_count(&cp.alphabet, cp.max_length, cp.min_length);
+        let combinations_total =
+            combinations_count(&cp.basic.alphabet, cp.basic.max_length, cp.basic.min_length);
 
-        let mut thread_count = get_thread_count(cp.fair_mode);
+        let mut thread_count = get_thread_count(cp.basic.fair_mode);
         if thread_count > combinations_total {
             // this only scales because I have the assumption, that there will never be thousands
             // of CPU threads/cores.

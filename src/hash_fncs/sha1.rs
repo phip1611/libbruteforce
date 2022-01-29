@@ -1,15 +1,15 @@
 use sha1::{Digest, Sha1};
 use sha1::digest::Output;
-use crate::TargetHashAndHashFunction;
+use crate::{TargetHashAndHashFunction, TargetHashInput};
 
-/// Returns a [`TargetHashAndHashFunction`] object that does [`sha1`] hashing.
-/// It gets initialized with the value we want to crack. The value we want to crack
-/// is a hash in string representation.
-pub fn sha1_hashing(target_hash_as_str: &str) -> TargetHashAndHashFunction<Sha1Hash> {
+/// Returns a [`TargetHashAndHashFunction`] object that does `sha1` hashing using [`mod@sha2`].
+/// It gets initialized with a object of type [`TargetHashInput`].
+pub fn sha1_hashing(input: TargetHashInput) -> TargetHashAndHashFunction<Sha1Hash> {
     TargetHashAndHashFunction::new(
-        target_hash_as_str,
+        input,
         sha1,
-        str_to_sha1_hash
+        str_to_sha1_hash,
+        sha1_hash_to_string,
     )
 }
 
@@ -27,15 +27,18 @@ fn str_to_sha1_hash(s: &str) -> Sha1Hash {
     target.into()
 }
 
+fn sha1_hash_to_string(hash: &Sha1Hash) -> String {
+    hex::encode(hash)
+}
+
 #[cfg(test)]
 mod tests {
-    use crate::TargetHashAndHashFunctionTrait;
     use super::*;
 
     #[test]
     fn test_sha1() {
         let input = "sha1";
         let expected_hash = "415ab40ae9b7cc4e66d6769cb2c08106e8293b48";
-        assert!(sha1_hashing(expected_hash).hash_matches(input));
+        assert!(sha1_hashing(TargetHashInput::HashAsStr(expected_hash)).hash_matches(input));
     }
 }
