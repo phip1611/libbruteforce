@@ -123,8 +123,7 @@ pub fn crack<T: CrackTarget>(param: CrackParameter<T>) -> CrackResult {
     // wait for all threads
     let solution = handles
         .into_iter()
-        .map(|h| h.join().unwrap()) // result of the Option<String> from the threads
-        .flatten()
+        .flat_map(|h| h.join().unwrap()) // result of the Option<String> from the threads
         .last(); // extract from the collection
 
     let seconds = instant.elapsed().as_secs_f64();
