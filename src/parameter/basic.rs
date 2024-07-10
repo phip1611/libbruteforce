@@ -37,6 +37,7 @@ pub struct BasicCrackParameter {
 
 impl BasicCrackParameter {
     /// Constructor.
+    #[must_use]
     pub fn new(alphabet: Box<[char]>, max_length: u32, min_length: u32, fair_mode: bool) -> Self {
         Self {
             alphabet,
@@ -46,15 +47,19 @@ impl BasicCrackParameter {
         }
     }
 
+    #[must_use]
     pub const fn alphabet(&self) -> &[char] {
         &self.alphabet
     }
+    #[must_use]
     pub const fn max_length(&self) -> u32 {
         self.max_length
     }
+    #[must_use]
     pub const fn min_length(&self) -> u32 {
         self.min_length
     }
+    #[must_use]
     pub const fn fair_mode(&self) -> bool {
         self.fair_mode
     }

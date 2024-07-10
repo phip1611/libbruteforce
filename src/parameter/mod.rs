@@ -40,9 +40,11 @@ use crate::CrackTarget;
 pub use basic::BasicCrackParameter;
 pub use target_hash::*;
 
+#[cfg(test)]
+pub(crate) use internal::get_thread_count;
 pub(crate) use internal::InternalCrackParameter;
 
-/// Crack parameter for [`crate::crack<T: CrackTarget>()`]. It combines the basic struct
+/// Crack parameter for `crate::crack<T: CrackTarget>()`. It combines the basic struct
 /// [`BasicCrackParameter`] with the generic [`TargetHashAndHashFunction`]. This separation exists
 /// so that hash selection functions can be written more convenient.
 ///
@@ -91,7 +93,7 @@ impl<T: CrackTarget> CrackParameter<T> {
     ///         sha256_hashing(TargetHashInput::HashAsStr(sha256_hash)),
     /// );
     /// ```
-    pub fn new(basic: BasicCrackParameter, crack_info: TargetHashAndHashFunction<T>) -> Self {
+    pub const fn new(basic: BasicCrackParameter, crack_info: TargetHashAndHashFunction<T>) -> Self {
         Self {
             basic,
             target_hash_and_hash_fnc: crack_info,
@@ -99,26 +101,26 @@ impl<T: CrackTarget> CrackParameter<T> {
     }
 
     /// Convenient wrapper for [`BasicCrackParameter::alphabet`].
-    pub fn alphabet(&self) -> &[char] {
+    pub const fn alphabet(&self) -> &[char] {
         self.basic.alphabet()
     }
 
     /// Convenient wrapper for [`BasicCrackParameter::max_length`].
-    pub fn max_length(&self) -> u32 {
+    pub const fn max_length(&self) -> u32 {
         self.basic.max_length()
     }
 
     /// Convenient wrapper for [`BasicCrackParameter::min_length`].
-    pub fn min_length(&self) -> u32 {
+    pub const fn min_length(&self) -> u32 {
         self.basic.min_length()
     }
 
     /// Convenient wrapper for [`BasicCrackParameter::fair_mode`].
-    pub fn fair_mode(&self) -> bool {
+    pub const fn fair_mode(&self) -> bool {
         self.basic.fair_mode()
     }
 
-    pub fn target_hash_and_hash_fnc(&self) -> &TargetHashAndHashFunction<T> {
+    pub const fn target_hash_and_hash_fnc(&self) -> &TargetHashAndHashFunction<T> {
         &self.target_hash_and_hash_fnc
     }
 }

@@ -78,41 +78,49 @@ impl CrackResult {
     }
 
     /// Returns true, if no solution was found.
+    #[must_use]
     pub const fn is_failure(&self) -> bool {
         self.solution.is_none()
     }
 
     /// Returns true, if a solution was found.
+    #[must_use]
     pub const fn is_success(&self) -> bool {
         self.solution.is_some()
     }
 
     /// Returns the solution, if any.
+    #[must_use]
     pub const fn solution(&self) -> &Option<String> {
         &self.solution
     }
 
     /// Returns the number of threads that were used.
+    #[must_use]
     pub const fn thread_count(&self) -> usize {
         self.thread_count
     }
 
     /// Returns the number of total combinations that would have been possible (worst case).
+    #[must_use]
     pub const fn combinations_total(&self) -> usize {
         self.combinations_total
     }
 
     /// Returns the number of combinations each thread has to check in the worst case.
+    #[must_use]
     pub const fn combinations_p_t(&self) -> usize {
         self.combinations_p_t
     }
 
     /// Returns the duration of the cracking process in seconds.
+    #[must_use]
     pub const fn duration_in_seconds(&self) -> f64 {
         self.duration_in_seconds
     }
 
     /// Returns the target hash that needed to be cracked.
+    #[must_use]
     pub fn target(&self) -> &str {
         &self.target
     }

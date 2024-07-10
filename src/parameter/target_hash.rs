@@ -111,7 +111,7 @@ impl<T: CrackTarget> TargetHashAndHashFunction<T> {
     }
 
     /// Returns the target hash that we want to crack.
-    pub fn target_hash(&self) -> &T {
+    pub const fn target_hash(&self) -> &T {
         &self.target_hash
     }
 

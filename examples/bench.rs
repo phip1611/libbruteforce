@@ -37,8 +37,8 @@ fn main() {
     SimpleLogger::new().with_utc_timestamps().init().unwrap();
 
     // create value we want to hash
-    const MAX_LEN: u32 = 4; // everything above 4 with the full alphabet => takes already quite some time
-    let alphabet = Builder::new().full().build();
+    const MAX_LEN: u32 = 5; // everything above 4 with the full alphabet => takes already quite some time
+    let alphabet = Builder::new().with_letters().with_digits().build();
     let worst_case_pw = create_worst_case_search_password(&alphabet, MAX_LEN);
 
     println!(

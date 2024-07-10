@@ -44,16 +44,16 @@ pub(crate) struct InternalCrackParameter<T: CrackTarget> {
 }
 
 impl<T: CrackTarget> InternalCrackParameter<T> {
-    pub fn crack_param(&self) -> &CrackParameter<T> {
+    pub const fn crack_param(&self) -> &CrackParameter<T> {
         &self.crack_param
     }
-    pub fn thread_count(&self) -> usize {
+    pub const fn thread_count(&self) -> usize {
         self.thread_count
     }
-    pub fn combinations_total(&self) -> usize {
+    pub const fn combinations_total(&self) -> usize {
         self.combinations_total
     }
-    pub fn combinations_p_t(&self) -> usize {
+    pub const fn combinations_p_t(&self) -> usize {
         self.combinations_p_t
     }
     /// Convenient shortcut around [`crate::TargetHashAndHashFunction::hash_matches`].
@@ -96,8 +96,8 @@ impl<T: CrackTarget> From<CrackParameter<T>> for InternalCrackParameter<T> {
 /// Returns the thread count for cracking. ```fair_mode```means
 /// that n-1 thread is used so that the host system is less likely
 /// to hang during the process.
-fn get_thread_count(fair_mode: bool) -> usize {
-    let cpus = num_cpus::get();
+pub(crate) fn get_thread_count(fair_mode: bool) -> usize {
+    let cpus: usize = std::thread::available_parallelism().unwrap().into();
     if cpus > 1 && fair_mode {
         cpus - 1
     } else {

@@ -52,6 +52,7 @@ SOFTWARE.
     clippy::all,
     clippy::cargo,
     clippy::nursery,
+    clippy::must_use_candidate,
     // clippy::restriction,
     // clippy::pedantic
 )]
@@ -64,7 +65,6 @@ SOFTWARE.
 )]
 #![deny(missing_debug_implementations)]
 #![deny(rustdoc::all)]
-#![allow(rustdoc::missing_doc_code_examples)]
 
 use crate::crack::worker_threads::spawn_worker_threads;
 use std::fmt::Debug;
@@ -160,7 +160,6 @@ mod tests {
     }
 
     #[test]
-
     fn test_crack_dont_find_bc_of_min_length() {
         let cp = CrackParameter::new(
             BasicCrackParameter::new(vec!['a'].into_boxed_slice(), 4, 3, false),
@@ -177,8 +176,7 @@ mod tests {
     #[test]
     fn test_crack_identity() {
         let input = String::from("a+c");
-        let target = input.clone(); // identity hashing
-        let cp = create_test_crack_params_full_alphabet(&target);
+        let cp = create_test_crack_params_full_alphabet(&input);
         let res = crack(cp);
         assert!(res.is_success(), "a solution must be found!");
         assert!(
@@ -204,7 +202,7 @@ mod tests {
             "The cracked value is wrong! It's"
         );
 
-        if num_cpus::get() > 1 {
+        if get_thread_count(false) > 1 {
             assert!(cp_fair.fair_mode(), "Fair mode must be activated"); // check if really multiple threads are used
             assert!(res.thread_count() > 1, "multiple threads must be used"); // check if really multiple threads are used
 

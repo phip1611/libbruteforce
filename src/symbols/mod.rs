@@ -62,6 +62,7 @@ pub static ALL_OTHER_SPECIAL_CHARS: [char; 23] = [
 
 /// Calculates the amount of possible permutations if n symbols are given and m slots are available.
 /// This solutions counts in that the value can be zero-length, one-length and so on.
+#[must_use]
 pub fn combination_count(alphabet: &[char], max_length: u32, min_length: u32) -> usize {
     if min_length > max_length {
         panic!("max_length must be >= min_length")
