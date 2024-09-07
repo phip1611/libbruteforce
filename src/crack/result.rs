@@ -46,7 +46,7 @@ pub struct CrackResult {
 
 impl CrackResult {
     fn new<T: CrackTarget>(
-        cp: InternalCrackParameter<T>,
+        cp: &InternalCrackParameter<T>,
         duration_in_seconds: f64,
         solution: Option<String>,
     ) -> Self {
@@ -63,14 +63,14 @@ impl CrackResult {
     }
 
     pub(crate) fn new_failure<T: CrackTarget>(
-        cp: InternalCrackParameter<T>,
+        cp: &InternalCrackParameter<T>,
         seconds_as_fraction: f64,
     ) -> Self {
         Self::new(cp, seconds_as_fraction, None)
     }
 
     pub(crate) fn new_success<T: CrackTarget>(
-        cp: InternalCrackParameter<T>,
+        cp: &InternalCrackParameter<T>,
         seconds_as_fraction: f64,
         solution: String,
     ) -> Self {
@@ -91,8 +91,8 @@ impl CrackResult {
 
     /// Returns the solution, if any.
     #[must_use]
-    pub const fn solution(&self) -> &Option<String> {
-        &self.solution
+    pub fn solution(&self) -> Option<&str> {
+        self.solution.as_deref()
     }
 
     /// Returns the number of threads that were used.
