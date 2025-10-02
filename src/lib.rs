@@ -84,7 +84,9 @@ pub mod hash_fncs;
 mod parameter;
 pub mod symbols;
 
-/// Common trait for crack targets (hashes or plain text to crack). This is the super-type
+/// Common trait for crack targets (hashes or plain text to crack).
+///
+/// This is the super-type
 /// which enables the usage of multiple hashing algorithms. An example that
 /// implements this/fulfils the trait requirements is [`String`].
 // 'static:
@@ -96,7 +98,9 @@ pub trait CrackTarget: 'static + Eq + Send + Sync + Debug {}
 // automatically impl the trait for all types that fulfill the condition/required traits
 impl<T> CrackTarget for T where T: 'static + Eq + Send + Sync + Debug {}
 
-/// This function starts a multi-threaded brute force attack on a given target string. It supports
+/// This function starts a multi-threaded brute force attack on a given target string.
+///
+/// It supports
 /// any alphabet you would like to use. You must provide a hashing function. There is a pre-build
 /// set of transformation functions available, such as [`hash_fncs::no_hashing`] or
 /// [`hash_fncs::sha256_hashing`]. You can also provide your own hashing strategy.

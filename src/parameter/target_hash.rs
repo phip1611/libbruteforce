@@ -36,6 +36,7 @@ pub enum TargetHashInput<'a> {
 }
 
 /// Abstraction over a hashing algorithm and the target hash that needs to be cracked.
+///
 /// `T` is of type [`CrackTarget`]. This generic struct exists so that hashes of type
 /// [`CrackTarget`] can be checked independent of the hashing algorithm. This is
 /// more efficient than transforming every hash to a string and compare the hash
@@ -59,15 +60,15 @@ impl<T: CrackTarget> TargetHashAndHashFunction<T> {
     ///
     /// # Parameters
     /// * `target_hash` String representation of the target hash we want to crack.
-    ///                 This is usually the hex string representation of a sha256 hash or so.
+    ///   This is usually the hex string representation of a sha256 hash or so.
     /// * `hash_fn` Transforms a plain input password/guess of type `str` to the target hash.
-    ///                  This is the hashing function.
+    ///   This is the hashing function.
     /// * `hash_str_repr_to_hash_type_fn` Function that can take the argument `target_hash`
-    ///                                   and transform it to the target hashing type. This
-    ///                                   usually transforms the hex string that represents the
-    ///                                   hash to bytes in memory.
+    ///   and transform it to the target hashing type. This
+    ///   usually transforms the hex string that represents the
+    ///   hash to bytes in memory.
     /// * `hash_type_to_str_repr_fn` Function that transform the hash type to a string representation.
-    ///                             Usually, this will return a hex string that represents the hash.
+    ///   Usually, this will return a hex string that represents the hash.
     pub fn new(
         target_hash: TargetHashInput,
         hash_fn: fn(&str) -> T,

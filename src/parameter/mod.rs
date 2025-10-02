@@ -44,7 +44,9 @@ pub use target_hash::*;
 pub(crate) use internal::get_thread_count;
 pub(crate) use internal::InternalCrackParameter;
 
-/// Crack parameter for `crate::crack<T: CrackTarget>()`. It combines the basic struct
+/// Crack parameter for `crate::crack<T: CrackTarget>()`.
+///
+/// It combines the basic struct
 /// [`BasicCrackParameter`] with the generic [`TargetHashAndHashFunction`]. This separation exists
 /// so that hash selection functions can be written more convenient.
 ///
