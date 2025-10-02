@@ -26,6 +26,7 @@ SOFTWARE.
 
 use log::{info, trace};
 use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::mpsc::Sender;
 use std::sync::Arc;
 use std::thread;
 use std::thread::JoinHandle;
@@ -36,8 +37,9 @@ use crate::{CrackTarget, InternalCrackParameter};
 /// Spawns all worker threads.
 pub(crate) fn spawn_worker_threads<T: CrackTarget>(
     params: Arc<InternalCrackParameter<T>>,
+    sender: Sender<String>,
     done: Arc<AtomicBool>,
-) -> Vec<JoinHandle<Option<String>>> {
+) -> Vec<JoinHandle<()>> {
     let mut handles = vec![];
     // spawn thread for each cpu
     for tid in 0..params.thread_count() {
@@ -53,6 +55,7 @@ pub(crate) fn spawn_worker_threads<T: CrackTarget>(
 
         handles.push(spawn_worker_thread(
             params.clone(),
+            sender.clone(),
             done.clone(),
             indices,
             tid,
@@ -64,10 +67,11 @@ pub(crate) fn spawn_worker_threads<T: CrackTarget>(
 /// Spawns a worker thread with its work loop.
 fn spawn_worker_thread<T: CrackTarget>(
     params: Arc<InternalCrackParameter<T>>,
+    sender: Sender<String>,
     done: Arc<AtomicBool>,
     mut indices: Box<[isize]>,
     tid: usize,
-) -> JoinHandle<Option<String>> {
+) -> JoinHandle<()> {
     // Counter for total iterations/total checked values
     let mut iteration_count = 0;
 
@@ -75,11 +79,8 @@ fn spawn_worker_thread<T: CrackTarget>(
         // reserve a string buffer with the maximum needed size; in the worst case it can contain
         // indices.len() * 4 bytes, because UTF-8 chars can be at most 4 byte long. Because
         // I prevent the allocation for a string in every iteration and do this only once,
-        // I cauld improve the performance even further.
+        // I could improve the performance even further.
         let mut current_crack_string = String::with_capacity(indices.len() * 4);
-
-        // The result that the thread calculated/found
-        let mut result = None;
 
         /// The amount of iterations after the thread checks if another thread
         /// is already done, so that we can stop further work. We do this only after
@@ -96,7 +97,7 @@ fn spawn_worker_thread<T: CrackTarget>(
             {
                 if interrupt_count == 0 {
                     interrupt_count = INTERRUPT_COUNT_THRESHOLD;
-                    if done.load(Ordering::SeqCst) {
+                    if done.load(Ordering::Relaxed) {
                         trace!("Thread {:>2} stops at {:>6.2}% progress because another thread found a solution", tid, get_percent(&params, iteration_count));
                         break;
                     } else {
@@ -142,14 +143,15 @@ fn spawn_worker_thread<T: CrackTarget>(
                         tid,
                         get_percent(&params, iteration_count)
                     );
-                    // let other threads know we are done
-                    done.store(true, Ordering::SeqCst);
-                    result = Some(current_crack_string);
-                    break;
+                    // send the result to the main thread
+                    if sender.send(current_crack_string.clone()).is_err() {
+                        // and quit if the channel is closed
+                        trace!("Thread {:>2} stops at {:>6.2}% progress because the solutions channel is closed", tid, get_percent(&params, iteration_count));
+                        break;
+                    }
                 }
             }
         }
-        result
     })
 }
 

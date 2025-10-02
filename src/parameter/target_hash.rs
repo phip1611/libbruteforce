@@ -36,6 +36,7 @@ pub enum TargetHashInput<'a> {
 }
 
 /// Abstraction over a hashing algorithm and the target hash that needs to be cracked.
+///
 /// `T` is of type [`CrackTarget`]. This generic struct exists so that hashes of type
 /// [`CrackTarget`] can be checked independent of the hashing algorithm. This is
 /// more efficient than transforming every hash to a string and compare the hash
