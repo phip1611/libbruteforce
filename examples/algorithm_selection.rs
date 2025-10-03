@@ -22,7 +22,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 use libbruteforce::hash_fncs::{md5_hashing, no_hashing, sha1_hashing, sha256_hashing};
-use libbruteforce::{crack, symbols, BasicCrackParameter, CrackParameter, TargetHashInput};
+use libbruteforce::{BasicCrackParameter, CrackParameter, TargetHashInput, crack, symbols};
 
 /// This code is the result of hours of struggling when I tried to generify the selection
 /// of the hashing algorithm. The problem is that each hashing algorithm operates

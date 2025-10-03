@@ -25,8 +25,8 @@ SOFTWARE.
 //! The actual cracking happens here in the closure in [`spawn_worker_thread`].
 
 use log::{info, trace};
-use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
+use std::sync::atomic::{AtomicBool, Ordering};
 use std::thread;
 use std::thread::JoinHandle;
 
@@ -97,7 +97,11 @@ fn spawn_worker_thread<T: CrackTarget>(
                 if interrupt_count == 0 {
                     interrupt_count = INTERRUPT_COUNT_THRESHOLD;
                     if done.load(Ordering::SeqCst) {
-                        trace!("Thread {:>2} stops at {:>6.2}% progress because another thread found a solution", tid, get_percent(&params, iteration_count));
+                        trace!(
+                            "Thread {:>2} stops at {:>6.2}% progress because another thread found a solution",
+                            tid,
+                            get_percent(&params, iteration_count)
+                        );
                         break;
                     } else {
                         trace!(

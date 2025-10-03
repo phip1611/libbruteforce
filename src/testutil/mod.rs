@@ -29,7 +29,7 @@ SOFTWARE.
 //!
 //! This module will also contain benchmarking utility functions.
 
-use crate::hash_fncs::{no_hashing, sha256_hashing, Sha256Hash};
+use crate::hash_fncs::{Sha256Hash, no_hashing, sha256_hashing};
 use crate::symbols::Builder;
 use crate::{BasicCrackParameter, CrackParameter, TargetHashInput};
 

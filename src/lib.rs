@@ -68,8 +68,8 @@ SOFTWARE.
 
 use crate::crack::worker_threads::spawn_worker_threads;
 use std::fmt::Debug;
-use std::sync::atomic::AtomicBool;
 use std::sync::Arc;
+use std::sync::atomic::AtomicBool;
 use std::time::Instant;
 
 pub use crack::CrackResult;

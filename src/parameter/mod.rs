@@ -40,9 +40,9 @@ use crate::CrackTarget;
 pub use basic::BasicCrackParameter;
 pub use target_hash::*;
 
+pub(crate) use internal::InternalCrackParameter;
 #[cfg(test)]
 pub(crate) use internal::get_thread_count;
-pub(crate) use internal::InternalCrackParameter;
 
 /// Crack parameter for `crate::crack<T: CrackTarget>()`.
 ///
