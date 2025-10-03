@@ -28,7 +28,7 @@ SOFTWARE.
 //! PS: RUN THIS IN RELEASE MODE (= a lot faster). `cargo run --bin bench --release`
 
 use libbruteforce::hash_fncs::sha256_hashing;
-use libbruteforce::symbols::{combination_count, Builder};
+use libbruteforce::symbols::{Builder, combination_count};
 use libbruteforce::{BasicCrackParameter, CrackParameter, TargetHashInput};
 use simple_logger::SimpleLogger;
 

@@ -2,7 +2,7 @@
 name = "libbruteforce"
 version = "4.0.1"
 authors = ["Philipp Schuster <phip1611@gmail.com>"]
-edition = "2021"
+edition = "2024"
 license = "MIT"
 description = '''
 This library helps you to brute force hashes (e.g. passwords). It includes a set of pre-configured
@@ -19,6 +19,7 @@ categories = ["algorithms"]
 exclude = [
     ".github",
 ]
+rust-version = "1.85.0"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
@@ -31,7 +32,7 @@ hex = "0.4"
 
 # for examples
 [dev-dependencies]
-simple_logger = "2.1"
+simple_logger = "5.0"
 
 [profile.dev]
 # With this, examples and tests run faster by a lot by default.

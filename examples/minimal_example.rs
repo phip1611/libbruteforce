@@ -21,9 +21,9 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
-use libbruteforce::hash_fncs::sha256_hashing;
 use libbruteforce::BasicCrackParameter;
-use libbruteforce::{symbols, CrackParameter, TargetHashInput};
+use libbruteforce::hash_fncs::sha256_hashing;
+use libbruteforce::{CrackParameter, TargetHashInput, symbols};
 use simple_logger::SimpleLogger;
 
 /// Minimal example.

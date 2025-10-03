@@ -49,7 +49,7 @@ pub(crate) use crate::hash_fncs::sha256::Sha256Hash;
 mod tests {
     use super::*;
     use crate::symbols;
-    use crate::{crack, BasicCrackParameter, CrackParameter, TargetHashInput};
+    use crate::{BasicCrackParameter, CrackParameter, TargetHashInput, crack};
 
     /// This code is the result of hours of struggling when I tried to generify the selection
     /// of the hashing algorithm. The problem is that each hashing algorithm operates
