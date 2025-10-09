@@ -69,8 +69,10 @@ SOFTWARE.
 use crate::crack::worker_threads::spawn_worker_threads;
 use std::fmt::Debug;
 use std::sync::Arc;
-use std::sync::atomic::AtomicBool;
-use std::time::Instant;
+use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::mpsc::{Receiver, RecvError, RecvTimeoutError, channel};
+use std::thread::JoinHandle;
+use std::time::{Duration, Instant};
 
 pub use crack::CrackResult;
 pub use parameter::*;
@@ -86,23 +88,21 @@ pub mod symbols;
 
 /// Common trait for crack targets (hashes or plain text to crack).
 ///
-/// This is the super-type
-/// which enables the usage of multiple hashing algorithms. An example that
-/// implements this/fulfils the trait requirements is [`String`].
+/// This is the super-type which enables the usage of multiple hashing algorithms.
+/// An example that implements this/fulfils the trait requirements is [`String`].
 // 'static:
 //  - it means the type does not contain any non-static references; i.e. consumes can
 //    own implementers of this type easily
 //  - https://doc.rust-lang.org/rust-by-example/scope/lifetime/static_lifetime.html
-pub trait CrackTarget: 'static + Eq + Send + Sync + Debug {}
+pub trait CrackTarget: 'static + Eq + Send + Sync + Debug + Clone {}
 
 // automatically impl the trait for all types that fulfill the condition/required traits
-impl<T> CrackTarget for T where T: 'static + Eq + Send + Sync + Debug {}
+impl<T> CrackTarget for T where T: 'static + Eq + Send + Sync + Debug + Clone {}
 
-/// This function starts a multi-threaded brute force attack on a given target string.
+/// Start a multi-threaded brute force attack on a given target string.
 ///
-/// It supports
-/// any alphabet you would like to use. You must provide a hashing function. There is a pre-build
-/// set of transformation functions available, such as [`hash_fncs::no_hashing`] or
+/// It supports any alphabet you would like to use. You must provide a hashing function.
+/// There is a pre-build set of transformation functions available, such as [`hash_fncs::no_hashing`] or
 /// [`hash_fncs::sha256_hashing`]. You can also provide your own hashing strategy.
 ///
 /// This library is really "dumb". It checks each possible value and doesn't use any probabilities
@@ -121,23 +121,144 @@ pub fn crack<T: CrackTarget>(param: CrackParameter<T>) -> CrackResult {
     // so they can stop their work. This only gets checked at every millionth iteration
     // for better performance.
     let done = Arc::from(AtomicBool::from(false));
-    let instant = Instant::now();
-    let handles = spawn_worker_threads(param.clone(), done);
+    // solutions are send over the channel
+    // when the sender channels are closed, the threads haven't found a solution
+    let (sender, receiver) = channel();
 
-    // wait for all threads
-    let solution = handles
-        .into_iter()
-        .flat_map(|h| h.join().unwrap()) // result of the Option<String> from the threads
-        .last(); // extract from the collection
+    let instant = Instant::now();
+    let handles = spawn_worker_threads(param.clone(), sender, done.clone());
+
+    let solution = receiver.recv().ok();
+    done.store(true, Ordering::Relaxed);
+    // if we don't drop the receiver, the threads will keep searching
+    drop(receiver);
 
     let seconds = instant.elapsed().as_secs_f64();
 
+    // wait for all threads to actually finish
+    handles.into_iter().for_each(|h| h.join().unwrap());
+
     let param =
         Arc::try_unwrap(param).unwrap_or_else(|_| panic!("There should only be one reference!"));
-    if let Some(solution) = solution {
-        CrackResult::new_success(param, seconds, solution)
-    } else {
-        CrackResult::new_failure(param, seconds)
+    solution.map_or_else(
+        || CrackResult::new_failure(&param, seconds),
+        |solution| CrackResult::new_success(&param, seconds, solution),
+    )
+}
+
+/// Starts a multi-threaded brute force attack on a given target string that keeps search after a match.
+///
+/// This variant of [`crack()`] is useful for weak hash functions, where you need the original value
+/// but there are many matches for a hash.
+///
+/// It supports any alphabet you would like to use. You must provide a hashing function.
+/// There is a pre-build set of transformation functions available, such as [`hash_fncs::no_hashing`] or
+/// [`hash_fncs::sha256_hashing`]. You can also provide your own hashing strategy.
+///
+/// This library is really "dumb". It checks each possible value and doesn't use any probabilities
+/// for more or less probable passwords.
+///
+/// # Parameters
+/// * `param` - See [`CrackParameter`]
+///
+/// # Return
+/// Returns a [`CrackResult`].
+pub fn crack_iter<T: CrackTarget>(param: CrackParameter<T>) -> CrackResults<T> {
+    let param = InternalCrackParameter::from(param);
+    let param = Arc::from(param);
+
+    // shared atomic bool so that all threads can look if one already found a solution
+    // so they can stop their work. This only gets checked at every millionth iteration
+    // for better performance.
+    let done = Arc::from(AtomicBool::from(false));
+    // solutions are send over the channel
+    // when the sender channels are closed, the threads haven't found a solution
+    let (sender, receiver) = channel();
+
+    let start = Instant::now();
+    let handles = spawn_worker_threads(param.clone(), sender, done.clone());
+
+    CrackResults {
+        receiver,
+        done,
+        handles,
+        start,
+        param,
+    }
+}
+
+#[derive(Debug)]
+pub struct CrackResults<T: CrackTarget> {
+    receiver: Receiver<String>,
+    done: Arc<AtomicBool>,
+    handles: Vec<JoinHandle<()>>,
+    start: Instant,
+    param: Arc<InternalCrackParameter<T>>,
+}
+
+impl<T: CrackTarget> Iterator for CrackResults<T> {
+    type Item = CrackResult;
+
+    /// This call is blocking.
+    ///
+    /// For the non-blocking variant, use
+    /// [`CrackResults::next_timeout()`]
+    fn next(&mut self) -> Option<Self::Item> {
+        match self.receiver.recv() {
+            Ok(solution) => {
+                let seconds = self.start.elapsed().as_secs_f64();
+                Some(CrackResult::new_success(&self.param, seconds, solution))
+            }
+            Err(RecvError) => {
+                // all senders are closed so this shouldn't be necessary, but just in case
+                self.done.store(true, Ordering::Relaxed);
+                // cleanup all the handles
+                while let Some(handle) = self.handles.pop() {
+                    handle.join().unwrap();
+                }
+                None
+            }
+        }
+    }
+}
+
+impl<T: CrackTarget> CrackResults<T> {
+    /// Attempts to wait for a result, returning `Ok(None)` if there is still progress.
+    ///
+    /// Will return `Err(CrackResult)` if all the threads are done.
+    pub fn next_timeout(&mut self, timeout: Duration) -> Result<Option<CrackResult>, CrackResult> {
+        match self.receiver.recv_timeout(timeout) {
+            Ok(solution) => {
+                let seconds = self.start.elapsed().as_secs_f64();
+                Ok(Some(CrackResult::new_success(
+                    &self.param,
+                    seconds,
+                    solution,
+                )))
+            }
+            Err(RecvTimeoutError::Timeout) => Ok(None),
+            Err(RecvTimeoutError::Disconnected) => {
+                // all senders are closed so this shouldn't be necessary, but just in case
+                self.done.store(true, Ordering::Relaxed);
+                // cleanup all the handles
+                while let Some(handle) = self.handles.pop() {
+                    handle.join().unwrap();
+                }
+
+                let seconds = self.start.elapsed().as_secs_f64();
+                Err(CrackResult::new_failure(&self.param, seconds))
+            }
+        }
+    }
+
+    /// Stop search for a match
+    pub fn stop(&mut self) {
+        // stop all the threads
+        self.done.store(true, Ordering::Relaxed);
+        // cleanup all the handles
+        while let Some(handle) = self.handles.pop() {
+            handle.join().unwrap();
+        }
     }
 }
 
@@ -202,7 +323,7 @@ mod tests {
         let res = crack(cp);
         assert!(res.is_success(), "A solution MUST be found!");
         assert!(
-            input.eq(res.solution().as_ref().unwrap()),
+            input.eq(res.solution().unwrap()),
             "The cracked value is wrong! It's"
         );
 
@@ -213,7 +334,7 @@ mod tests {
             let res_fair = crack(cp_fair);
             assert!(res_fair.is_success(), "A solution MUST be found!");
             assert!(
-                input.eq(res.solution().as_ref().unwrap()),
+                input.eq(res.solution().unwrap()),
                 "The cracked value is wrong!"
             );
             assert!(
