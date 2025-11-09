@@ -52,17 +52,9 @@ SOFTWARE.
     clippy::all,
     clippy::cargo,
     clippy::nursery,
-    clippy::must_use_candidate,
-    // clippy::restriction,
-    // clippy::pedantic
+    clippy::must_use_candidate
 )]
-// now allow a few rules which are denied by the above statement
-// --> they are ridiculous and not necessary
-#![allow(
-    clippy::suboptimal_flops,
-    clippy::redundant_pub_crate,
-    clippy::fallible_impl_from
-)]
+#![allow(clippy::redundant_pub_crate)]
 #![deny(missing_debug_implementations)]
 #![deny(rustdoc::all)]
 
