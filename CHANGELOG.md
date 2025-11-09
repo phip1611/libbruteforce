@@ -3,6 +3,7 @@
 ## Unreleased
 - Update to Rust edition 2024
 - MSRV is now 1.85
+- We now have a channel
 
 ## v4.0.0 (2022-01-29)
 - breaking changes to public API
