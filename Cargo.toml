@@ -32,7 +32,7 @@ hex = "0.4"
 
 # for examples
 [dev-dependencies]
-simple_logger = "5.1"
+simple_logger = "5.2"
 
 [profile.dev]
 # With this, examples and tests run faster by a lot by default.
