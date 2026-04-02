@@ -19,7 +19,7 @@ follow the steps here:
 - <https://deterministic.space/high-performance-rust.html>
 
 #### MSRV
-1.56.1
+1.88.0
 
 #### Works On
 Linux, MacOS, Windows (targets with Rusts standard library)
