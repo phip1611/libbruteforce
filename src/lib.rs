@@ -54,10 +54,7 @@ SOFTWARE.
     clippy::nursery,
     clippy::must_use_candidate
 )]
-#![allow(
-    clippy::multiple_crate_versions,
-    clippy::redundant_pub_crate
-)]
+#![allow(clippy::multiple_crate_versions, clippy::redundant_pub_crate)]
 #![deny(missing_debug_implementations)]
 #![deny(rustdoc::all)]
 
