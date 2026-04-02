@@ -94,7 +94,8 @@ pub fn indices_increment_by(
         }
 
         // the current index at this position in the indices array
-        let current_value = indices[index];
+        // SAFETY: We only iterate valid indices.
+        let current_value = unsafe { indices.get_unchecked(index) };
         // new value; possibly overflowed its range
         let mut new_value = current_value + carry as isize;
 
@@ -107,7 +108,10 @@ pub fn indices_increment_by(
             carry = 0;
         }
 
-        indices[index] = new_value;
+        // SAFETY: We only iterate valid indices.
+        unsafe {
+            *indices.get_unchecked_mut(index) = new_value;
+        }
     }
 
     if carry == 0 {

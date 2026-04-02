@@ -2,7 +2,9 @@
 
 ## Unreleased
 - Update to Rust edition 2024
-- MSRV is now 1.85
+- MSRV is now 1.88
+- We now have a channel to fetch multiple results instead of stopping after
+  the first one
 
 ## v4.0.0 (2022-01-29)
 - breaking changes to public API
