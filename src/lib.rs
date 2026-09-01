@@ -78,6 +78,14 @@ pub mod hash_fncs;
 mod parameter;
 pub mod symbols;
 
+/// Internal hot-path helpers exposed only so the criterion benchmarks in
+/// `benches/` can measure them. This is not part of the public API and comes
+/// with no stability guarantees.
+#[doc(hidden)]
+pub mod bench_internals {
+    pub use crate::crack::indices::{indices_create, indices_increment_by, indices_to_string};
+}
+
 /// Common trait for crack targets (hashes or plain text to crack).
 ///
 /// This is the super-type which enables the usage of multiple hashing algorithms.

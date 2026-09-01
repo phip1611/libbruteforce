@@ -41,6 +41,7 @@ SOFTWARE.
 /// go back to "-1" once been at 0 because we can't have empty
 /// slots inside a word (they shall be marked with a space in
 /// the alphabet).
+#[must_use]
 pub fn indices_create(max_length: u32, min_length: u32) -> Box<[isize]> {
     if min_length > max_length {
         panic!("max_length must be >= min_length")
@@ -152,7 +153,7 @@ mod tests {
     #[test]
     #[should_panic]
     fn test_create_indices_arr_panic() {
-        indices_create(0, 1);
+        let _ = indices_create(0, 1);
     }
 
     #[test]
