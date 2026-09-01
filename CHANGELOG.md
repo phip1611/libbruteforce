@@ -1,6 +1,8 @@
 # CHANGELOG
 
 ## Unreleased
+- Performance: faster candidate-string rendering on the cracking hot path
+  (~28% on the rendering step in micro-benchmarks)
 - Replaced the hand-rolled benchmark example with a criterion-based benchmark
   harness (`cargo bench`) focused on the cracking hot path
 - Update to Rust edition 2024

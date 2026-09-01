@@ -65,7 +65,9 @@ pub fn indices_to_string(buf: &mut String, alphabet: &[char], indices: &[isize])
         .iter()
         // skip empty fields. -1 means nothing (the empty word ""), not " "
         .filter(|index| **index != -1)
-        .map(|index| alphabet[*index as usize])
+        // SAFETY: valid indices are always within 0..alphabet.len(), the same
+        // invariant indices_increment_by relies on.
+        .map(|index| unsafe { *alphabet.get_unchecked(*index as usize) })
         .for_each(|char| buf.push(char))
 }
 
