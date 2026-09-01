@@ -25,19 +25,24 @@ SOFTWARE.
 //!
 //! The innermost worker loop repeats three steps for every candidate: advance
 //! the indices to the next candidate, render them into a string, and hash that
-//! string. These benchmarks measure exactly those steps, single-threaded and in
-//! isolation, so they are fast and low-noise and reliably show the effect of
-//! changes to the candidate-generation code.
+//! string.
 //!
-//! The `hashing` group is included for context only: it is the dominant
-//! per-candidate cost in a real run, so the generation numbers should always be
-//! weighed against it.
+//! * `candidate_generation` measures the first two steps single-threaded and in
+//!   isolation, so it is fast and low-noise and reliably shows the effect of
+//!   changes to the candidate-generation code.
+//! * `hashing` is included for context: it is the dominant per-candidate cost in
+//!   a real run, so the generation numbers should be weighed against it.
+//! * `end_to_end` runs the full multi-threaded `crack()` over a small,
+//!   deterministic search space. It is the only benchmark that exercises the
+//!   worker loop itself (thread orchestration, per-iteration overhead), but it
+//!   is noisier, so it suits coarse A/B comparisons rather than sub-percent
+//!   claims.
 
-use criterion::{Criterion, Throughput, criterion_group, criterion_main};
-use libbruteforce::TargetHashInput;
+use criterion::{BatchSize, Criterion, Throughput, criterion_group, criterion_main};
 use libbruteforce::bench_internals::{indices_create, indices_increment_by, indices_to_string};
-use libbruteforce::hash_fncs::sha256_hashing;
-use libbruteforce::symbols::Builder;
+use libbruteforce::hash_fncs::{no_hashing, sha256_hashing};
+use libbruteforce::symbols::{Builder, combination_count};
+use libbruteforce::{BasicCrackParameter, CrackParameter, TargetHashInput, crack};
 use std::hint::black_box;
 
 /// Candidate length used by the generation benchmarks.
@@ -107,5 +112,73 @@ fn bench_hashing(c: &mut Criterion) {
     group.finish();
 }
 
-criterion_group!(benches, bench_candidate_generation, bench_hashing);
+/// Alphabet and length for the end-to-end benchmarks. Digits (10 symbols) with
+/// length 6 give ~1.1M candidates: large enough that the actual cracking work
+/// dominates the thread spawn/join overhead of a single `crack()` call, yet
+/// small enough to finish in a few milliseconds.
+const E2E_MAX_LEN: u32 = 6;
+
+fn digits() -> Box<[char]> {
+    Builder::new().with_digits().build()
+}
+
+/// Worst-case target for a full search: the last candidate in the space (the
+/// highest symbol repeated to the maximum length). Every candidate is checked
+/// before it is found, so the measured work is deterministic.
+fn worst_case_password(alphabet: &[char], len: u32) -> String {
+    let last = *alphabet.last().expect("alphabet must not be empty");
+    std::iter::repeat_n(last, len as usize).collect()
+}
+
+fn bench_end_to_end(c: &mut Criterion) {
+    let alphabet = digits();
+    let worst_case = worst_case_password(&alphabet, E2E_MAX_LEN);
+    let total = combination_count(&alphabet, E2E_MAX_LEN, 0);
+
+    let mut group = c.benchmark_group("end_to_end");
+    group.throughput(Throughput::Elements(total as u64));
+    // Each iteration spawns and joins the full worker-thread pool, so keep the
+    // sample count modest to bound the total runtime. Multi-threaded runs are
+    // noisier than the single-threaded micro-benchmarks above; use them for
+    // coarse A/B comparisons, not for sub-percent claims.
+    group.sample_size(30);
+
+    // Generation-dominated: no hashing, so per-candidate work is small and
+    // worker-loop overhead is most visible.
+    group.bench_function("crack_no_hashing", |b| {
+        b.iter_batched(
+            || {
+                CrackParameter::new(
+                    BasicCrackParameter::new(alphabet.clone(), E2E_MAX_LEN, 0, false),
+                    no_hashing(TargetHashInput::Plaintext(&worst_case)),
+                )
+            },
+            crack,
+            BatchSize::PerIteration,
+        );
+    });
+
+    // Realistic: sha256 hashing dominates the per-candidate cost.
+    group.bench_function("crack_sha256", |b| {
+        b.iter_batched(
+            || {
+                CrackParameter::new(
+                    BasicCrackParameter::new(alphabet.clone(), E2E_MAX_LEN, 0, false),
+                    sha256_hashing(TargetHashInput::Plaintext(&worst_case)),
+                )
+            },
+            crack,
+            BatchSize::PerIteration,
+        );
+    });
+
+    group.finish();
+}
+
+criterion_group!(
+    benches,
+    bench_candidate_generation,
+    bench_hashing,
+    bench_end_to_end
+);
 criterion_main!(benches);
