@@ -1,6 +1,9 @@
 # CHANGELOG
 
 ## Unreleased
+
+## v4.1.0 (2026-09-17)
+
 - Performance: faster candidate-string rendering on the cracking hot path
   (~28% on the rendering step in micro-benchmarks)
 - Replaced the hand-rolled benchmark example with a criterion-based benchmark
@@ -8,7 +11,7 @@
 - Update to Rust edition 2024
 - MSRV is now 1.88
 - We now have a channel to fetch multiple results instead of stopping after
-  the first one
+  the first one. See `crack_iter()`.
 
 ## v4.0.0 (2022-01-29)
 - breaking changes to public API
