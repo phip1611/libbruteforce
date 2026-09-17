@@ -30,9 +30,14 @@ sha2 = "0.11"
 log = "0.4"
 hex = "0.4"
 
-# for examples
+# for examples and benchmarks
 [dev-dependencies]
 simple_logger = "5.1"
+criterion = "0.8"
+
+[[bench]]
+name = "hot_path"
+harness = false
 
 [profile.dev]
 # With this, examples and tests run faster by a lot by default.

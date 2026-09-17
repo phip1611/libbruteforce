@@ -41,6 +41,7 @@ SOFTWARE.
 /// go back to "-1" once been at 0 because we can't have empty
 /// slots inside a word (they shall be marked with a space in
 /// the alphabet).
+#[must_use]
 pub fn indices_create(max_length: u32, min_length: u32) -> Box<[isize]> {
     if min_length > max_length {
         panic!("max_length must be >= min_length")
@@ -64,7 +65,9 @@ pub fn indices_to_string(buf: &mut String, alphabet: &[char], indices: &[isize])
         .iter()
         // skip empty fields. -1 means nothing (the empty word ""), not " "
         .filter(|index| **index != -1)
-        .map(|index| alphabet[*index as usize])
+        // SAFETY: valid indices are always within 0..alphabet.len(), the same
+        // invariant indices_increment_by relies on.
+        .map(|index| unsafe { *alphabet.get_unchecked(*index as usize) })
         .for_each(|char| buf.push(char))
 }
 
@@ -152,7 +155,7 @@ mod tests {
     #[test]
     #[should_panic]
     fn test_create_indices_arr_panic() {
-        indices_create(0, 1);
+        let _ = indices_create(0, 1);
     }
 
     #[test]

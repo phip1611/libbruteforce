@@ -1,6 +1,10 @@
 # CHANGELOG
 
 ## Unreleased
+- Performance: faster candidate-string rendering on the cracking hot path
+  (~28% on the rendering step in micro-benchmarks)
+- Replaced the hand-rolled benchmark example with a criterion-based benchmark
+  harness (`cargo bench`) focused on the cracking hot path
 - Update to Rust edition 2024
 - MSRV is now 1.88
 - We now have a channel to fetch multiple results instead of stopping after
